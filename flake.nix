@@ -5,9 +5,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
+  let
+    user = "alex";
+  in
   {
     darwinConfigurations.work = nix-darwin.lib.darwinSystem {
       modules = [
@@ -16,7 +21,17 @@
           system.configurationRevision = self.rev or self.dirtyRev or null;
           system.stateVersion = 6;
           nixpkgs.hostPlatform = "aarch64-darwin";
+          users.users.${user}.home = "/Users/${user}";
         })
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.${user} = ./home.nix;
+          home-manager.extraSpecialArgs = {
+            user = user;
+          };
+        }
       ];
     };
   };
