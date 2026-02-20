@@ -18,11 +18,12 @@
     }:
     let
       system = "aarch64-darwin";
+      host = "work";
       user = "alex";
     in
     {
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
-      darwinConfigurations.work = nix-darwin.lib.darwinSystem {
+      darwinConfigurations.${host} = nix-darwin.lib.darwinSystem {
         modules = [
           (
             { pkgs, ... }:
@@ -31,6 +32,7 @@
               system.configurationRevision = self.rev or self.dirtyRev or null;
               system.stateVersion = 6;
               nixpkgs.hostPlatform = system;
+              networking.hostName = host;
               users.users.${user}.home = "/Users/${user}";
             }
           )

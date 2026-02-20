@@ -16,3 +16,13 @@ curl -L https://nixos.org/nix/install | sh
 # Install nix-darwin and set up system
 sudo nix run nix-darwin/nix-darwin-25.11#darwin-rebuild --extra-experimental-features "nix-command flakes" -- switch --flake /etc/nix-darwin#work
 ```
+
+## Usage
+
+```sh
+# Rebuild
+nh darwin switch
+
+# Update
+nh darwin switch --update
+```
