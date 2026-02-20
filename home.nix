@@ -5,9 +5,12 @@
   home.username = user;
 
   home.packages = [
+    pkgs.alcove
     pkgs.fd
     pkgs.nerd-fonts.jetbrains-mono
+    pkgs.raycast
     pkgs.ripgrep
+    pkgs.spotify
   ];
 
   home.sessionVariables = {
@@ -80,6 +83,15 @@
   };
 
   programs.gh.enable = true;
+
+  programs.ghostty = {
+    enable = true;
+    enableFishIntegration = true;
+    package = pkgs.ghostty-bin;
+    settings = {
+      theme = "Ayu";
+    };
+  };
 
   programs.git = {
     enable = true;

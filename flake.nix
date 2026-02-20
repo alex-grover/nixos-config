@@ -7,6 +7,15 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
   };
 
   outputs =
@@ -15,6 +24,9 @@
       nix-darwin,
       nixpkgs,
       home-manager,
+      nix-homebrew,
+      homebrew-core,
+      homebrew-cask,
     }:
     let
       system = "aarch64-darwin";
@@ -33,13 +45,31 @@
               system.stateVersion = 6;
               nixpkgs.hostPlatform = system;
               networking.hostName = host;
+              system.primaryUser = user;
               users.knownUsers = [ user ];
               users.users.${user} = {
                 uid = 501;
                 home = "/Users/${user}";
                 shell = pkgs.fish;
               };
+              nixpkgs.config.allowUnfree = true;
               programs.fish.enable = true;
+
+              homebrew = {
+                enable = true;
+
+                casks = [
+                  "logi-options+"
+                ];
+
+                masApps = {
+                  "uBlock Origin Lite" = 6745342698;
+                };
+
+                onActivation = {
+                  cleanup = "zap";
+                };
+              };
             }
           )
           home-manager.darwinModules.home-manager
@@ -51,6 +81,24 @@
               user = user;
             };
           }
+          nix-homebrew.darwinModules.nix-homebrew
+          {
+            nix-homebrew = {
+              enable = true;
+              user = user;
+              taps = {
+                "homebrew/homebrew-core" = homebrew-core;
+                "homebrew/homebrew-cask" = homebrew-cask;
+              };
+              mutableTaps = false;
+            };
+          }
+          (
+            { config, ... }:
+            {
+              homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+            }
+          )
         ];
       };
     };
