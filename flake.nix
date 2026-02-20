@@ -23,7 +23,13 @@
           system.stateVersion = 6;
           nixpkgs.hostPlatform = "aarch64-darwin";
           networking.hostName = host;
-          users.users.${user}.home = "/Users/${user}";
+          users.knownUsers = [ user ];
+          users.users.${user} = {
+            uid = 501;
+            home = "/Users/${user}";
+            shell = pkgs.fish;
+          };
+          programs.fish.enable = true;
         })
         home-manager.darwinModules.home-manager
         {
