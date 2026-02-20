@@ -6,11 +6,17 @@
 
   home.packages = [
     pkgs.alcove
+    pkgs.claude-code
     pkgs.fd
+    pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
+    pkgs.nodejs_22
+    pkgs.postgresql
     pkgs.raycast
     pkgs.ripgrep
+    pkgs.slack
     pkgs.spotify
+    pkgs.zoom-us
   ];
 
   home.sessionVariables = {
@@ -19,6 +25,8 @@
   };
 
   programs.bat.enable = true;
+
+  programs.bun.enable = true;
 
   programs.delta = {
     enable = true;
