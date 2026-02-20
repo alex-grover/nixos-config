@@ -11,16 +11,18 @@
 
   outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
   let
+    host = "work";
     user = "alex";
   in
   {
-    darwinConfigurations.work = nix-darwin.lib.darwinSystem {
+    darwinConfigurations.${host} = nix-darwin.lib.darwinSystem {
       modules = [
         ({ pkgs, ... }: {
           nix.settings.experimental-features = "nix-command flakes";
           system.configurationRevision = self.rev or self.dirtyRev or null;
           system.stateVersion = 6;
           nixpkgs.hostPlatform = "aarch64-darwin";
+          networking.hostName = host;
           users.users.${user}.home = "/Users/${user}";
         })
         home-manager.darwinModules.home-manager
