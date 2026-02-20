@@ -9,4 +9,7 @@ My nix configs.
 sudo mkdir -p /etc/nix-darwin
 sudo chown $(id -nu):$(id -ng) /etc/nix-darwin
 git clone https://github.com/alex-grover/nixos-config.git /etc/nix-darwin
+
+# Install nix
+curl -L https://nixos.org/nix/install | sh
 ```
