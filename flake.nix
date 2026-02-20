@@ -29,6 +29,7 @@
             home = "/Users/${user}";
             shell = pkgs.fish;
           };
+          nixpkgs.config.allowUnfree = true;
           programs.fish.enable = true;
         })
         home-manager.darwinModules.home-manager
