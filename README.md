@@ -14,7 +14,7 @@ git clone https://github.com/alex-grover/nixos-config.git /etc/nix-darwin
 curl -L https://nixos.org/nix/install | sh
 
 # Install nix-darwin and set up system
-sudo nix run nix-darwin/nix-darwin-25.11#darwin-rebuild --extra-experimental-features "nix-command flakes" -- switch --flake /etc/nix-darwin#work
+sudo nix run nix-darwin/nix-darwin-25.11#darwin-rebuild --extra-experimental-features "nix-command flakes" -- switch --flake /etc/nix-darwin#<host>
 ```
 
 ## Usage
