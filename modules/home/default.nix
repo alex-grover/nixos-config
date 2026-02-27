@@ -8,6 +8,7 @@
     pkgs.alcove
     pkgs.fd
     pkgs.jetbrains.webstorm
+    pkgs.jj-starship
     pkgs.nerd-fonts.jetbrains-mono
     pkgs.postgresql
     pkgs.raycast
@@ -27,6 +28,7 @@
   programs.delta = {
     enable = true;
     enableGitIntegration = true;
+    enableJujutsuIntegration = true;
     options.navigate = true;
   };
 
@@ -194,6 +196,40 @@
     };
   };
 
+  programs.jujutsu = {
+    enable = true;
+    settings = {
+      user = {
+        name = "Alex Grover";
+        email = "hello@alexgrover.me";
+      };
+
+      signing = {
+        behavior = "own";
+        backend = "ssh";
+        key = "~/.ssh/id_ed25519.pub";
+      };
+
+      templates = {
+        git_push_bookmark = "\"alex/\" ++ change_id.short()";
+      };
+
+      revsets = {
+        bookmark-advance-to = "closest_pushable(@)";
+      };
+
+      revset-aliases = {
+        "closest_pushable(to)" = "heads(::to & mutable() & ~description(exact:\"\") & (~empty() | merges()))";
+      };
+
+      ui = {
+        default-command = "status";
+        diff-editor = ":builtin";
+        merge-editor = ":builtin";
+      };
+    };
+  };
+
   programs.nh = {
     enable = true;
     flake = "/etc/nix-darwin";
@@ -203,6 +239,15 @@
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
+    settings = {
+      custom.jj = {
+        when = "jj-starship detect";
+        shell = [ "jj-starship" ];
+        format = "$output ";
+      };
+      git_branch.disabled = true;
+      git_status.disabled = true;
+    };
   };
 
   programs.zoxide = {
