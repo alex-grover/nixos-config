@@ -27,6 +27,7 @@
   programs.delta = {
     enable = true;
     enableGitIntegration = true;
+    enableJujutsuIntegration = true;
     options.navigate = true;
   };
 
@@ -191,6 +192,26 @@
     defaultEditor = true;
     settings = {
       theme = "ayu_dark";
+    };
+  };
+
+  programs.jujutsu = {
+    enable = true;
+    settings = {
+      user = {
+        name = "Alex Grover";
+        email = "hello@alexgrover.me";
+      };
+
+      signing = {
+        behavior = "own";
+        backend = "ssh";
+        key = "~/.ssh/id_ed25519.pub";
+      };
+
+      templates = {
+        git_push_bookmark = "\"alex/\" ++ change_id.short()";
+      };
     };
   };
 
