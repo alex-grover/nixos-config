@@ -1,17 +1,29 @@
 {
   lib,
+  config,
   pkgs,
   user,
-  host,
-  system,
+  inputs,
   ...
 }:
 {
-  nix.settings.experimental-features = "nix-command flakes";
-  system.configurationRevision = self.rev or self.dirtyRev or null;
+  imports = [
+    inputs.nix-homebrew.darwinModules.nix-homebrew
+  ];
+
+  nixpkgs.config.allowUnfree = true;
+
+  nix-homebrew = {
+    enable = true;
+    inherit user;
+    taps = {
+      "homebrew/homebrew-core" = inputs.homebrew-core;
+      "homebrew/homebrew-cask" = inputs.homebrew-cask;
+    };
+    mutableTaps = false;
+  };
+
   system.stateVersion = 6;
-  nixpkgs.hostPlatform = system;
-  networking.hostName = host;
   system.primaryUser = user;
   users.knownUsers = [ user ];
   users.users.${user} = {
@@ -19,11 +31,9 @@
     home = "/Users/${user}";
     shell = pkgs.fish;
   };
-  nixpkgs.config.allowUnfree = true;
-  programs.fish.enable = true;
-
   homebrew = {
     enable = true;
+    taps = builtins.attrNames config.nix-homebrew.taps;
 
     casks = [
       "logi-options+"

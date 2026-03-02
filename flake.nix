@@ -7,6 +7,11 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+    agenix.inputs.home-manager.follows = "home-manager";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -21,77 +26,41 @@
   outputs =
     inputs@{
       self,
-      nix-darwin,
       nixpkgs,
+      nix-darwin,
       home-manager,
       nix-homebrew,
       homebrew-core,
       homebrew-cask,
+      ...
     }:
     let
-      system = "aarch64-darwin";
-      hosts = [
-        "personal"
-        "work"
-      ];
       user = "alex";
 
-      mkHost =
-        host:
-        nix-darwin.lib.darwinSystem {
-          modules = [
-            (
-              { pkgs, ... }:
-              import ./modules/darwin.nix {
-                inherit
-                  self
-                  pkgs
-                  user
-                  host
-                  system
-                  ;
-              }
-            )
-            ./hosts/${host}.nix
-            home-manager.darwinModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.${user} =
-                { ... }:
-                {
-                  imports = [
-                    ./modules/home
-                    ./modules/home/${host}.nix
-                  ];
-                };
-              home-manager.extraSpecialArgs = {
-                user = user;
-              };
-            }
-            nix-homebrew.darwinModules.nix-homebrew
-            {
-              nix-homebrew = {
-                enable = true;
-                user = user;
-                taps = {
-                  "homebrew/homebrew-core" = homebrew-core;
-                  "homebrew/homebrew-cask" = homebrew-cask;
-                };
-                mutableTaps = false;
-              };
-            }
-            (
-              { config, ... }:
-              {
-                homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-              }
-            )
+      platforms = {
+        darwin = {
+          aarch64-darwin = [
+            "personal"
+            "work"
           ];
         };
+
+        nixos = {
+          x86_64-linux = [ "nas" ];
+        };
+      };
+
+      mkSystem = import ./lib/mksystem.nix { inherit nixpkgs inputs user; };
+      mkConfigurations = nixpkgs.lib.concatMapAttrs (
+        system: hosts: nixpkgs.lib.genAttrs hosts (name: mkSystem { inherit name system; })
+      );
     in
     {
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
-      darwinConfigurations = nixpkgs.lib.genAttrs hosts mkHost;
+      formatter = nixpkgs.lib.genAttrs (builtins.concatMap builtins.attrNames (
+        builtins.attrValues platforms
+      )) (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+
+      darwinConfigurations = mkConfigurations platforms.darwin;
+      nixosConfigurations = mkConfigurations platforms.nixos;
     };
 }
