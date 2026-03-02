@@ -1,19 +1,19 @@
-{ pkgs, user, ... }:
+{
+  pkgs,
+  user,
+  configPath,
+  ...
+}:
 {
   programs.home-manager.enable = true;
   home.stateVersion = "25.11";
   home.username = user;
 
   home.packages = [
-    pkgs.alcove
     pkgs.fd
-    pkgs.jetbrains.webstorm
     pkgs.jj-starship
-    pkgs.nerd-fonts.jetbrains-mono
     pkgs.postgresql
-    pkgs.raycast
     pkgs.ripgrep
-    pkgs.spotify
   ];
 
   home.sessionVariables = {
@@ -90,15 +90,6 @@
 
   programs.gh.enable = true;
 
-  programs.ghostty = {
-    enable = true;
-    enableFishIntegration = true;
-    package = pkgs.ghostty-bin;
-    settings = {
-      theme = "Ayu";
-    };
-  };
-
   programs.git = {
     enable = true;
 
@@ -128,8 +119,6 @@
         gpgsign = true;
         verbose = true;
       };
-
-      credential.helper = "osxkeychain";
 
       diff = {
         colorMoved = "plain";
@@ -219,7 +208,8 @@
       };
 
       revset-aliases = {
-        "closest_pushable(to)" = "heads(::to & mutable() & ~description(exact:\"\") & (~empty() | merges()))";
+        "closest_pushable(to)" =
+          "heads(::to & mutable() & ~description(exact:\"\") & (~empty() | merges()))";
       };
 
       ui = {
@@ -232,7 +222,7 @@
 
   programs.nh = {
     enable = true;
-    flake = "/etc/nix-darwin";
+    flake = configPath;
     clean.enable = true;
   };
 
@@ -254,9 +244,5 @@
     enable = true;
     enableFishIntegration = true;
     options = [ "--cmd cd" ];
-  };
-
-  home.file = {
-    ".hushlogin".text = "";
   };
 }

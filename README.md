@@ -2,7 +2,7 @@
 
 My nix configs.
 
-## Getting Started
+## Getting Started (Mac)
 
 ```sh
 # Clone repo
