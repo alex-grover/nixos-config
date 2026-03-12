@@ -12,8 +12,6 @@ in
 
   age.identityPaths = [ "/home/${user}/.ssh/id_ed25519" ];
 
-  system.stateVersion = "25.11";
-
   time.timeZone = "America/New_York";
 
   networking.useDHCP = true;
@@ -33,13 +31,16 @@ in
 
   services.tailscale.enable = true;
 
-  users.users.${user} = {
-    isNormalUser = true;
-    shell = pkgs.fish;
-    extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [
-      keys.personal
-      keys.work
-    ];
+  users = {
+    mutableUsers = false;
+    users.${user} = {
+      isNormalUser = true;
+      shell = pkgs.fish;
+      extraGroups = [ "wheel" ];
+      openssh.authorizedKeys.keys = [
+        keys.personal
+        keys.work
+      ];
+    };
   };
 }

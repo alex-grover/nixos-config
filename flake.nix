@@ -47,6 +47,7 @@
 
         nixos = {
           x86_64-linux = [ "nas" ];
+          aarch64-linux = [ "pi" ];
         };
       };
 

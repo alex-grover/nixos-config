@@ -16,6 +16,8 @@ in
     ./hardware-configuration.nix
   ];
 
+  system.stateVersion = "25.11";
+
   age.secrets.smtp.file = ../../secrets/smtp.age;
   age.secrets.zfs.file = ../../secrets/zfs.age;
 
