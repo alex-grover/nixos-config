@@ -9,6 +9,4 @@
       source "${pkgs.ghostty.shell_integration}/fish/vendor_conf.d/ghostty-shell-integration.fish"
     end
   '';
-
-  programs.git.settings.safe.directory = builtins.toString configPath;
 }

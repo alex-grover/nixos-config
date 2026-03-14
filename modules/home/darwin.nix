@@ -33,8 +33,6 @@
     };
   };
 
-  programs.git.settings.credential.helper = "osxkeychain";
-
   home.file = {
     ".hushlogin".text = "";
   };
