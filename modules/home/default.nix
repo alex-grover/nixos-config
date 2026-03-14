@@ -27,7 +27,6 @@
 
   programs.delta = {
     enable = true;
-    enableGitIntegration = true;
     enableJujutsuIntegration = true;
     options.navigate = true;
   };
@@ -53,24 +52,6 @@
       };
     };
 
-    shellAbbrs = {
-      ga = "git add";
-      gb = "git branch";
-      gc = "git commit";
-      gd = "git diff";
-      gdc = "git diff --cached";
-      gf = "git fetch";
-      gl = "git pull";
-      glg = "git log --stat --graph";
-      gls = "git ls-files";
-      gp = "git push";
-      gpf = "git push --force-with-lease";
-      gr = "git remote -v";
-      gs = "git status";
-      gt = "git checkout";
-      gtb = "git checkout -b";
-    };
-
     plugins = [
       {
         name = "autopair";
@@ -90,92 +71,7 @@
 
   programs.gh.enable = true;
 
-  programs.git = {
-    enable = true;
-
-    settings = {
-      user = {
-        name = "Alex Grover";
-        email = "hello@alexgrover.me";
-      };
-
-      github.user = "alex-grover";
-
-      advice = {
-        addEmptyPathspec = false;
-        skippedCherryPicks = false;
-      };
-
-      branch = {
-        autoSetupRebase = "always";
-        sort = "-committerdate";
-      };
-
-      color.ui = "auto";
-
-      column.ui = "auto";
-
-      commit = {
-        gpgsign = true;
-        verbose = true;
-      };
-
-      diff = {
-        colorMoved = "plain";
-        algorithm = "histogram";
-        renames = true;
-        mnemonicPrefix = true;
-      };
-
-      fetch = {
-        prune = true;
-        pruneTags = true;
-        all = true;
-      };
-
-      gpg.format = "ssh";
-
-      help.autocorrect = 1;
-
-      init.defaultBranch = "main";
-
-      merge.conflictStyle = "diff3";
-
-      mergetool.nixfmt = {
-        cmd = "nixfmt --mergetool \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"";
-        trustExitCode = true;
-      };
-
-      pull.rebase = true;
-
-      push = {
-        default = "current";
-        followTags = true;
-      };
-
-      rebase = {
-        autoSquash = true;
-        autoStash = true;
-        updateRefs = true;
-      };
-
-      rerere = {
-        enabled = true;
-        autoupdate = true;
-      };
-
-      tag = {
-        gpgSign = true;
-        sort = "version:refname";
-      };
-    };
-
-    signing = {
-      format = "ssh";
-      key = "~/.ssh/id_ed25519.pub";
-      signByDefault = true;
-    };
-  };
+  programs.git.enable = true;
 
   programs.helix = {
     enable = true;
@@ -198,6 +94,8 @@
         backend = "ssh";
         key = "~/.ssh/id_ed25519.pub";
       };
+
+      git.colocate = false;
 
       templates = {
         git_push_bookmark = "\"alex/\" ++ change_id.shortest(8)";
@@ -235,8 +133,6 @@
         shell = [ "jj-starship" ];
         format = "$output ";
       };
-      git_branch.disabled = true;
-      git_status.disabled = true;
     };
   };
 
