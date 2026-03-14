@@ -42,10 +42,7 @@ in
         "wheel"
         "transmission"
       ];
-      openssh.authorizedKeys.keys = [
-        keys.personal
-        keys.work
-      ];
+      openssh.authorizedKeys.keys = builtins.attrValues keys.ssh;
     };
   };
 }
