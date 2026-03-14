@@ -39,6 +39,7 @@ in
       extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = [
         keys.personal
+        keys.phone
         keys.work
       ];
     };

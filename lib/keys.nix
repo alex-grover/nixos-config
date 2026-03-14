@@ -3,4 +3,5 @@
   pi = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAwVMtoocx+NqneKDgcYWX3ltc718UX3cMRcN/0oe2W4";
   personal = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJZWoN6eoYlb8wzoIRONN6syKzxMngiBcCTlVje3rks8";
   work = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO2KNsLEcAYfipp3phhwmCPIEo6eEBJZ/dZQioWf7KaZ";
+  phone = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhvnsGks9hbpsIQDKdxum9MrfkicjTHihc+q1PDC138";
 }
