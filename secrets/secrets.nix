@@ -2,6 +2,7 @@ let
   keys = import ../lib/keys.nix;
   secrets = [
     "smtp.age"
+    "vpn.age"
     "zfs.age"
   ];
 in
