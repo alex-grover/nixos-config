@@ -87,6 +87,20 @@ in
           mode = "2775";
         };
       };
+      radarr = {
+        "/data/torrents/movies".d = {
+          user = "radarr";
+          group = "radarr";
+          mode = "2775";
+        };
+      };
+      sonarr = {
+        "/data/torrents/tv shows".d = {
+          user = "sonarr";
+          group = "sonarr";
+          mode = "2775";
+        };
+      };
     };
 
   services.samba = {
@@ -145,6 +159,50 @@ in
       }
     ];
   };
+
+  services.caddy = {
+    enable = true;
+    virtualHosts."http://nas.alexgrover.me" = {
+      extraConfig = ''
+        handle /transmission* {
+          reverse_proxy 127.0.0.1:9091
+        }
+        handle /sonarr* {
+          reverse_proxy 127.0.0.1:8989
+        }
+        handle /radarr* {
+          reverse_proxy 127.0.0.1:7878
+        }
+        handle /prowlarr* {
+          reverse_proxy 127.0.0.1:9696
+        }
+      '';
+    };
+  };
+
+  networking.firewall.allowedTCPPorts = [ 80 ];
+
+  services.radarr = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  services.sonarr = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  services.prowlarr = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  users.users.radarr.extraGroups = [ "transmission" ];
+  users.users.sonarr.extraGroups = [ "transmission" ];
+  users.users.${user}.extraGroups = [
+    "radarr"
+    "sonarr"
+  ];
 
   services.transmission = {
     enable = true;
