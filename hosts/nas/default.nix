@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   name,
   user,
@@ -15,6 +16,24 @@ let
   vpnIpv4 = "10.2.0.2";
   vpnIpv6 = "2a07:b944::2:2";
   vpnTable = "51820";
+  dashboardServices = [
+    {
+      name = "Radarr";
+      port = 7878;
+    }
+    {
+      name = "Sonarr";
+      port = 8989;
+    }
+    {
+      name = "Prowlarr";
+      port = 9696;
+    }
+    {
+      name = "Transmission";
+      port = 9091;
+    }
+  ];
 in
 {
   imports = [
@@ -24,8 +43,18 @@ in
   ];
 
   age.secrets.smtp.file = ../../secrets/smtp.age;
+  age.secrets.vercel.file = ../../secrets/vercel.age;
   age.secrets.vpn.file = ../../secrets/vpn.age;
   age.secrets.zfs.file = ../../secrets/zfs.age;
+
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = email;
+    certs."nas.alexgrover.me" = {
+      dnsProvider = "vercel";
+      credentialFiles.VERCEL_API_TOKEN_FILE = config.age.secrets.vercel.path;
+    };
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -160,27 +189,89 @@ in
     ];
   };
 
-  services.caddy = {
+  services.glance = {
     enable = true;
-    virtualHosts."http://nas.alexgrover.me" = {
-      extraConfig = ''
-        handle /transmission* {
-          reverse_proxy 127.0.0.1:9091
+    settings = {
+      branding.hide-footer = true;
+      theme = {
+        light = false;
+        background-color = "220 29 6";
+        primary-color = "105 61 62";
+        positive-color = "80 65 57";
+        negative-color = "357 81 69";
+        contrast-multiplier = 1.1;
+      };
+      pages = [
+        {
+          name = "Home";
+          width = "slim";
+          hide-desktop-navigation = true;
+          center-vertically = true;
+          columns = [
+            {
+              size = "full";
+              widgets = [
+                { type = "clock"; }
+                {
+                  type = "server-stats";
+                  servers = [
+                    {
+                      type = "local";
+                      hide-swap = true;
+                      mountpoints = {
+                        "/" = {
+                          name = "Root";
+                          hide = false;
+                        };
+                        "/data/media" = {
+                          name = "Media";
+                          hide = false;
+                        };
+                      };
+                      hide-mountpoints-by-default = true;
+                    }
+                  ];
+                }
+                {
+                  type = "monitor";
+                  title = "Services";
+                  cache = "1m";
+                  sites = map (s: {
+                    title = s.name;
+                    url = "https://nas.alexgrover.me/${lib.toLower s.name}";
+                    icon = "di:${lib.toLower s.name}";
+                  }) dashboardServices;
+                }
+              ];
+            }
+          ];
         }
-        handle /sonarr* {
-          reverse_proxy 127.0.0.1:8989
-        }
-        handle /radarr* {
-          reverse_proxy 127.0.0.1:7878
-        }
-        handle /prowlarr* {
-          reverse_proxy 127.0.0.1:9696
-        }
-      '';
+      ];
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 ];
+  services.caddy = {
+    enable = true;
+    virtualHosts."nas.alexgrover.me" = {
+      useACMEHost = "nas.alexgrover.me";
+      extraConfig =
+        lib.concatMapStrings (s: ''
+          handle /${lib.toLower s.name}* {
+            reverse_proxy 127.0.0.1:${toString s.port}
+          }
+        '') dashboardServices
+        + ''
+          handle {
+            reverse_proxy 127.0.0.1:8080
+          }
+        '';
+    };
+  };
+
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   services.radarr = {
     enable = true;

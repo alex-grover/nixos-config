@@ -91,6 +91,11 @@
               keylocation = "file://${config.age.secrets.zfs.path}";
             };
           };
+          torrents = {
+            type = "zfs_fs";
+            mountpoint = "/data/torrents";
+            options.recordsize = "1M";
+          };
         };
       };
     };
