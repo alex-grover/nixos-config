@@ -13,9 +13,12 @@ let
     media = "/data/media";
     torrents = "/data/torrents";
   };
+
   vpnIpv4 = "10.2.0.2";
   vpnIpv6 = "2a07:b944::2:2";
   vpnTable = "51820";
+  vpnGateway = "10.2.0.1";
+
   dashboardServices = [
     {
       name = "Radarr";
@@ -172,10 +175,12 @@ in
     postSetup = ''
       ${pkgs.iproute2}/bin/ip rule add from ${vpnIpv4} table ${vpnTable}
       ${pkgs.iproute2}/bin/ip -6 rule add from ${vpnIpv6} table ${vpnTable}
+      ${pkgs.iproute2}/bin/ip rule add to ${vpnGateway} table ${vpnTable}
     '';
     postShutdown = ''
       ${pkgs.iproute2}/bin/ip rule del from ${vpnIpv4} table ${vpnTable}
       ${pkgs.iproute2}/bin/ip -6 rule del from ${vpnIpv6} table ${vpnTable}
+      ${pkgs.iproute2}/bin/ip rule del to ${vpnGateway} table ${vpnTable}
     '';
     peers = [
       {
@@ -294,6 +299,32 @@ in
     "radarr"
     "sonarr"
   ];
+
+  systemd.services.transmission-port-forward = {
+    description = "Request VPN port forwarding via NAT-PMP and update Transmission";
+    after = [ "wireguard-vpn.service" "transmission.service" ];
+    requires = [ "wireguard-vpn.service" "transmission.service" ];
+    path = [ pkgs.libnatpmp pkgs.transmission_4 ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "transmission";
+    };
+    script = ''
+      port=$(natpmpc -g ${vpnGateway} -a 0 0 udp 60 | grep "public port" | head -1 | awk '{print $4}')
+      natpmpc -g ${vpnGateway} -a 0 0 tcp 60 > /dev/null
+      if [ -n "$port" ]; then
+        transmission-remote 127.0.0.1:9091 -p "$port"
+      fi
+    '';
+  };
+
+  systemd.timers.transmission-port-forward = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitActiveSec = "45s";
+    };
+  };
 
   services.transmission = {
     enable = true;
