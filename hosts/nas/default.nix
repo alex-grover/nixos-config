@@ -62,6 +62,23 @@ in
   boot.zfs.forceImportRoot = false;
   networking.hostId = "cb3aedbe";
 
+  systemd.services.zfs-load-key-data-media = {
+    description = "Load ZFS encryption key for data/media";
+    requires = [ "zfs-import-data.service" ];
+    after = [ "zfs-import-data.service" ];
+    before = [ "zfs-mount.service" ];
+    requiredBy = [ "zfs-mount.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "zfs-load-key-data-media" ''
+        if [ "$(${pkgs.zfs}/bin/zfs get -H -o value keystatus data/media)" = "unavailable" ]; then
+          ${pkgs.zfs}/bin/zfs load-key data/media
+        fi
+      '';
+    };
+  };
+
   services.fstrim.enable = true;
 
   programs.msmtp = {
