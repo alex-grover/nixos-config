@@ -324,6 +324,8 @@ in
       bind-address-ipv6 = vpnIpv6;
       download-dir = "/data/torrents/transmission/downloads";
       incomplete-dir = "/data/torrents/transmission/incomplete";
+      ratio-limit = 0;
+      ratio-limit-enabled = true;
       umask = 2;
     };
   };
