@@ -10,6 +10,8 @@
     pkgs.alcove
     pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
+    pkgs.ollama
+    pkgs.opencode
     pkgs.raycast
     pkgs.spotify
   ];
