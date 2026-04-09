@@ -16,6 +16,7 @@ let
   vpnIpv4 = "10.2.0.2";
   vpnIpv6 = "2a07:b944::2:2";
   vpnTable = "51820";
+  photosDomain = "photos.alexgrover.me";
   dashboardServices = [
     {
       name = "Radarr";
@@ -50,10 +51,10 @@ in
   security.acme = {
     acceptTerms = true;
     defaults.email = email;
-    certs."nas.alexgrover.me" = {
+    certs = lib.genAttrs [ "nas.alexgrover.me" photosDomain ] (_: {
       dnsProvider = "vercel";
       credentialFiles.VERCEL_API_TOKEN_FILE = config.age.secrets.vercel.path;
-    };
+    });
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -131,6 +132,13 @@ in
           user = "transmission";
           group = "transmission";
           mode = "2775";
+        };
+      };
+      immich = {
+        "/data/media/immich".z = {
+          user = "immich";
+          group = "immich";
+          mode = "0700";
         };
       };
       radarr = {
@@ -253,11 +261,19 @@ in
                   type = "monitor";
                   title = "Services";
                   cache = "1m";
-                  sites = map (s: {
-                    title = s.name;
-                    url = "https://nas.alexgrover.me/${lib.toLower s.name}";
-                    icon = "di:${lib.toLower s.name}";
-                  }) dashboardServices;
+                  sites =
+                    map (s: {
+                      title = s.name;
+                      url = "https://nas.alexgrover.me/${lib.toLower s.name}";
+                      icon = "di:${lib.toLower s.name}";
+                    }) dashboardServices
+                    ++ [
+                      {
+                        title = "Immich";
+                        url = "https://${photosDomain}";
+                        icon = "di:immich";
+                      }
+                    ];
                 }
               ];
             }
@@ -269,6 +285,12 @@ in
 
   services.caddy = {
     enable = true;
+    virtualHosts.${photosDomain} = {
+      useACMEHost = photosDomain;
+      extraConfig = ''
+        reverse_proxy [::1]:${toString config.services.immich.port}
+      '';
+    };
     virtualHosts."nas.alexgrover.me" = {
       useACMEHost = "nas.alexgrover.me";
       extraConfig =
@@ -290,20 +312,22 @@ in
     443
   ];
 
-  services.radarr = {
+  hardware.graphics.enable = true;
+
+  services.immich = {
     enable = true;
-    openFirewall = true;
+    mediaLocation = "/data/media/immich";
+    accelerationDevices = null;
   };
 
-  services.sonarr = {
-    enable = true;
-    openFirewall = true;
-  };
+  users.users.immich.extraGroups = [
+    "video"
+    "render"
+  ];
 
-  services.prowlarr = {
-    enable = true;
-    openFirewall = true;
-  };
+  services.radarr.enable = true;
+  services.sonarr.enable = true;
+  services.prowlarr.enable = true;
 
   users.users.radarr.extraGroups = [ "transmission" ];
   users.users.sonarr.extraGroups = [ "transmission" ];
