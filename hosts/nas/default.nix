@@ -118,6 +118,17 @@ in
     };
   };
 
+  services.syncoid = {
+    enable = true;
+    commonArgs = [ "--no-sync-snap" ];
+    commands.media = {
+      source = "data/media";
+      target = "backup/media";
+      sendOptions = "-w";
+      recvOptions = "-u";
+    };
+  };
+
   systemd.tmpfiles.settings =
     builtins.mapAttrs (_: path: {
       ${path}.z = {
