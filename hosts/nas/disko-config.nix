@@ -89,6 +89,7 @@
               encryption = "aes-256-gcm";
               keyformat = "passphrase";
               keylocation = "file://${config.age.secrets.zfs.path}";
+              "com.sun:auto-snapshot" = "true";
             };
           };
           torrents = {
