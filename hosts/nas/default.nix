@@ -15,6 +15,7 @@ let
   };
   vpnIpv4 = "10.2.0.2";
   vpnIpv6 = "2a07:b944::2:2";
+  vpnGateway = "10.2.0.1";
   vpnTable = "51820";
   photosDomain = "photos.alexgrover.me";
   dashboardServices = [
@@ -62,23 +63,6 @@ in
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.forceImportRoot = false;
   networking.hostId = "cb3aedbe";
-
-  systemd.services.zfs-load-key-data-media = {
-    description = "Load ZFS encryption key for data/media";
-    requires = [ "zfs-import-data.service" ];
-    after = [ "zfs-import-data.service" ];
-    before = [ "zfs-mount.service" ];
-    requiredBy = [ "zfs-mount.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = pkgs.writeShellScript "zfs-load-key-data-media" ''
-        if [ "$(${pkgs.zfs}/bin/zfs get -H -o value keystatus data/media)" = "unavailable" ]; then
-          ${pkgs.zfs}/bin/zfs load-key data/media
-        fi
-      '';
-    };
-  };
 
   services.fstrim.enable = true;
 
@@ -205,18 +189,20 @@ in
     ];
     privateKeyFile = config.age.secrets.vpn.path;
     table = vpnTable;
-    postSetup = ''
-      ${pkgs.iproute2}/bin/ip rule add from ${vpnIpv4} table ${vpnTable}
-      ${pkgs.iproute2}/bin/ip -6 rule add from ${vpnIpv6} table ${vpnTable}
+    postSetup = let ip = "${pkgs.iproute2}/bin/ip"; in ''
+      ${ip} rule add from ${vpnIpv4} table ${vpnTable}
+      ${ip} -6 rule add from ${vpnIpv6} table ${vpnTable}
+      ${ip} route add ${vpnGateway} dev vpn src ${vpnIpv4} || true
     '';
-    postShutdown = ''
-      ${pkgs.iproute2}/bin/ip rule del from ${vpnIpv4} table ${vpnTable}
-      ${pkgs.iproute2}/bin/ip -6 rule del from ${vpnIpv6} table ${vpnTable}
+    postShutdown = let ip = "${pkgs.iproute2}/bin/ip"; in ''
+      ${ip} rule del from ${vpnIpv4} table ${vpnTable}
+      ${ip} -6 rule del from ${vpnIpv6} table ${vpnTable}
     '';
     peers = [
       {
         publicKey = "R8Of+lrl8DgOQmO6kcjlX7SchP4ncvbY90MB7ZUNmD8=";
         endpoint = "193.148.18.82:51820";
+        persistentKeepalive = 25;
         allowedIPs = [
           "0.0.0.0/0"
           "::/0"
@@ -322,6 +308,7 @@ in
     80
     443
   ];
+  networking.firewall.trustedInterfaces = [ "vpn" ];
 
   hardware.graphics.enable = true;
 
@@ -339,6 +326,52 @@ in
   services.radarr.enable = true;
   services.sonarr.enable = true;
   services.prowlarr.enable = true;
+
+  systemd.services = lib.genAttrs [
+    "transmission"
+    "radarr"
+    "sonarr"
+    "prowlarr"
+    "immich-server"
+    "caddy"
+    "samba-smbd"
+  ] (_: {
+    after = [ "zfs-mount.service" ];
+    requires = [ "zfs-mount.service" ];
+  }) // {
+    zfs-load-key-data-media = {
+      description = "Load ZFS encryption key for data/media";
+      requires = [ "zfs-import-data.service" ];
+      after = [ "zfs-import-data.service" ];
+      before = [ "zfs-mount.service" ];
+      requiredBy = [ "zfs-mount.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "zfs-load-key-data-media" ''
+          if [ "$(${pkgs.zfs}/bin/zfs get -H -o value keystatus data/media)" = "unavailable" ]; then
+            ${pkgs.zfs}/bin/zfs load-key data/media
+          fi
+        '';
+      };
+    };
+    transmission-natpmp = {
+      description = "NAT-PMP port forwarding for Transmission via ProtonVPN";
+      after = [ "wireguard-vpn.service" "transmission.service" ];
+      requires = [ "transmission.service" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig.Restart = "on-failure";
+      path = with pkgs; [ libnatpmp gawk gnugrep config.services.transmission.package ];
+      script = ''
+        while true; do
+          port=$(natpmpc -a 1 0 udp 60 -g ${vpnGateway} | grep 'Mapped public port' | awk '{print $4}')
+          natpmpc -a 1 0 tcp 60 -g ${vpnGateway} > /dev/null
+          [ -n "$port" ] && transmission-remote 127.0.0.1:9091 -p "$port"
+          sleep 45
+        done
+      '';
+    };
+  };
 
   users.users.radarr.extraGroups = [ "transmission" ];
   users.users.sonarr.extraGroups = [ "transmission" ];
@@ -361,7 +394,9 @@ in
       incomplete-dir = "/data/torrents/transmission/incomplete";
       ratio-limit = 0;
       ratio-limit-enabled = true;
+      port-forwarding-enabled = false;
       umask = 2;
     };
   };
+
 }
