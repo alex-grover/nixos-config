@@ -329,8 +329,6 @@ in
 
   systemd.services = lib.genAttrs [
     "transmission"
-    "radarr"
-    "sonarr"
     "prowlarr"
     "immich-server"
     "caddy"
@@ -338,6 +336,10 @@ in
   ] (_: {
     after = [ "zfs-mount.service" ];
     requires = [ "zfs-mount.service" ];
+  }) // lib.genAttrs [ "radarr" "sonarr" ] (_: {
+    after = [ "zfs-mount.service" ];
+    requires = [ "zfs-mount.service" ];
+    serviceConfig.UMask = lib.mkForce "0002";
   }) // {
     zfs-load-key-data-media = {
       description = "Load ZFS encryption key for data/media";
@@ -358,9 +360,12 @@ in
     transmission-natpmp = {
       description = "NAT-PMP port forwarding for Transmission via ProtonVPN";
       after = [ "wireguard-vpn.service" "transmission.service" ];
-      requires = [ "transmission.service" ];
+      bindsTo = [ "transmission.service" ];
       wantedBy = [ "multi-user.target" ];
-      serviceConfig.Restart = "on-failure";
+      serviceConfig = {
+        Restart = "always";
+        RestartSec = 5;
+      };
       path = with pkgs; [ libnatpmp gawk gnugrep config.services.transmission.package ];
       script = ''
         while true; do
