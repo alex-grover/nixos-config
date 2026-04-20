@@ -1,7 +1,6 @@
 { lib, user, ... }:
 {
   homebrew.casks = [
-    "claude-code@latest"
     "linear-linear"
   ];
 

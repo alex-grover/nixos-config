@@ -11,6 +11,7 @@
     pkgs.nerd-fonts.jetbrains-mono
     pkgs.ollama
     pkgs.opencode
+    pkgs.pi-coding-agent
     pkgs.raycast
     pkgs.spotify
   ];
