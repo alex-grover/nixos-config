@@ -12,7 +12,6 @@
   home.packages = [
     pkgs.fd
     pkgs.jj-starship
-    pkgs.postgresql
     pkgs.ripgrep
   ];
 
@@ -23,12 +22,20 @@
 
   programs.bat.enable = true;
 
-  programs.bun.enable = true;
-
   programs.delta = {
     enable = true;
     enableJujutsuIntegration = true;
     options.navigate = true;
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableFishIntegration = true;
+    nix-direnv.enable = true;
+    silent = true;
+    package = pkgs.direnv.overrideAttrs (_: {
+      doCheck = false;
+    });
   };
 
   programs.eza = {
@@ -128,6 +135,7 @@
     enable = true;
     enableFishIntegration = true;
     settings = {
+      nix_shell.symbol = "❄️ ";
       custom.jj = {
         when = "jj-starship detect";
         shell = [ "jj-starship" ];
