@@ -180,7 +180,16 @@ in
     };
   };
 
-  services.tailscale.useRoutingFeatures = "server";
+  services.tailscale = {
+    useRoutingFeatures = "server";
+    extraSetFlags = [ "--accept-dns=false" ];
+  };
+
+  services.adguardhome = {
+    enable = true;
+    mutableSettings = false;
+    openFirewall = true;
+  };
 
   networking.wireguard.interfaces.vpn = {
     ips = [
@@ -278,6 +287,11 @@ in
                         url = "https://${photosDomain}";
                         icon = "di:immich";
                       }
+                      {
+                        title = "AdGuard Home";
+                        url = "https://nas.alexgrover.me/adguard/";
+                        icon = "di:adguard-home";
+                      }
                     ];
                 }
               ];
@@ -305,6 +319,15 @@ in
           }
         '') dashboardServices
         + ''
+          redir /adguard /adguard/
+
+          handle_path /adguard/* {
+            reverse_proxy 127.0.0.1:${toString config.services.adguardhome.port} {
+              header_down Location "^/(.*)$" "/adguard/$1"
+              header_down Set-Cookie "(?i)Path=/" "Path=/adguard/"
+            }
+          }
+
           handle {
             reverse_proxy 127.0.0.1:8080
           }
@@ -313,9 +336,11 @@ in
   };
 
   networking.firewall.allowedTCPPorts = [
+    53
     80
     443
   ];
+  networking.firewall.allowedUDPPorts = [ 53 ];
   networking.firewall.trustedInterfaces = [ "vpn" ];
 
   hardware.graphics.enable = true;
