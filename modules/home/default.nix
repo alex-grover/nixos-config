@@ -131,6 +131,12 @@
     clean.enable = true;
   };
 
+  programs.nnn = {
+    enable = true;
+    enableFishIntegration = true;
+    quitcd = true;
+  };
+
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
