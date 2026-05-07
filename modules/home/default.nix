@@ -85,6 +85,9 @@
     defaultEditor = true;
     settings = {
       theme = "ayu_dark";
+      editor = {
+        bufferline = "multiple";
+      };
     };
   };
 
