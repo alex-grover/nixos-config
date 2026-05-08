@@ -4,6 +4,9 @@
   configPath,
   ...
 }:
+let
+  hunk = pkgs.callPackage ../../pkgs/hunk.nix { };
+in
 {
   programs.home-manager.enable = true;
   home.stateVersion = "25.11";
@@ -11,6 +14,7 @@
 
   home.packages = [
     pkgs.fd
+    hunk
     pkgs.jj-starship
     pkgs.ripgrep
   ];
@@ -21,12 +25,6 @@
   };
 
   programs.bat.enable = true;
-
-  programs.delta = {
-    enable = true;
-    enableJujutsuIntegration = true;
-    options.navigate = true;
-  };
 
   programs.direnv = {
     enable = true;
@@ -123,7 +121,12 @@
       ui = {
         default-command = "status";
         diff-editor = ":builtin";
+        diff-formatter = ":git";
         merge-editor = ":builtin";
+        pager = [
+          "hunk"
+          "pager"
+        ];
       };
     };
   };
