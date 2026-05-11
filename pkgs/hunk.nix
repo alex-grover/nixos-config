@@ -5,23 +5,23 @@
   autoPatchelfHook,
 }:
 let
-  version = "0.10.0";
+  version = "0.11.1";
   assets = {
     aarch64-darwin = {
       name = "hunkdiff-darwin-arm64";
-      hash = "sha256-cdiwcZPevnbhlpsHzPeRVsb5WQdunaNlTCKh+XwarUU=";
+      hash = "sha256-TjSrDxHjYXasXEr+O0Nid9PcJRvZIbRK/lP7DrGHtZo=";
     };
     x86_64-darwin = {
       name = "hunkdiff-darwin-x64";
-      hash = "sha256-70O4DI3+7ZuZstem8QeiL/qrj9M65nYVflqzqUlpnSY=";
+      hash = "sha256-dq8D7a6s0MUIATq2tgMi0VYIp00qWqLNddiUlIUcazo=";
     };
     aarch64-linux = {
       name = "hunkdiff-linux-arm64";
-      hash = "sha256-epaG0urTx3nqr2mIClkDLzrxf+gOZE4EDyC0YyEPq8M=";
+      hash = "sha256-vFzAW+6fXj6kNWm7V7Oj46F8xfjLMssrWti158uQ8ec=";
     };
     x86_64-linux = {
       name = "hunkdiff-linux-x64";
-      hash = "sha256-ND3Kb1u0B5O+joNCvE4LzJjYpSFnt5QWDFGmuAmYns8=";
+      hash = "sha256-XQkhUXxA9Vsd1ILgyo3cRqrOTfYNgVSUyiY9ZnQYchQ=";
     };
   };
   asset = assets.${stdenv.hostPlatform.system} or (throw "hunk is not available for ${stdenv.hostPlatform.system}");
