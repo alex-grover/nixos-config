@@ -40,6 +40,7 @@ in
 {
   imports = [
     inputs.disko.nixosModules.disko
+    inputs.disko-zfs.nixosModules.default
     ./disko-config.nix
     ./hardware-configuration.nix
   ];
@@ -65,6 +66,16 @@ in
   networking.hostId = "cb3aedbe";
 
   services.fstrim.enable = true;
+
+  disko.zfs = {
+    enable = true;
+    settings.ignoredProperties = [
+      "encryption"
+      "keyformat"
+      "normalization"
+      "nixos:*"
+    ];
+  };
 
   programs.msmtp = {
     enable = true;

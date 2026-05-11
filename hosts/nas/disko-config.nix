@@ -73,7 +73,7 @@
         mountpoint = null;
         options.ashift = "12";
         rootFsOptions = {
-          acltype = "posixacl";
+          acltype = "posix";
           atime = "off";
           compression = "zstd";
           mountpoint = "none";
@@ -85,6 +85,7 @@
             type = "zfs_fs";
             mountpoint = "/data/media";
             options = {
+              mountpoint = "/data/media";
               recordsize = "1M";
               encryption = "aes-256-gcm";
               keyformat = "passphrase";
@@ -95,7 +96,10 @@
           torrents = {
             type = "zfs_fs";
             mountpoint = "/data/torrents";
-            options.recordsize = "1M";
+            options = {
+              mountpoint = "/data/torrents";
+              recordsize = "1M";
+            };
           };
         };
       };
