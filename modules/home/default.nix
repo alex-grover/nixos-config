@@ -84,7 +84,16 @@ in
     settings = {
       theme = "ayu_dark";
       editor = {
+        auto-format = true;
         bufferline = "multiple";
+        color-modes = true;
+        cursorline = true;
+        line-number = "relative";
+        file-picker = {
+          hidden = false;
+          ignore = true;
+          git-ignore = true;
+        };
       };
     };
   };

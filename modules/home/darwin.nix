@@ -27,10 +27,10 @@
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks."github.com" = {
-      addKeysToAgent = "yes";
-      identityFile = "~/.ssh/id_ed25519";
-      extraOptions.UseKeychain = "yes";
+    settings."github.com" = {
+      AddKeysToAgent = "yes";
+      IdentityFile = "~/.ssh/id_ed25519";
+      UseKeychain = "yes";
     };
   };
 

@@ -24,7 +24,9 @@ let
       hash = "sha256-XQkhUXxA9Vsd1ILgyo3cRqrOTfYNgVSUyiY9ZnQYchQ=";
     };
   };
-  asset = assets.${stdenv.hostPlatform.system} or (throw "hunk is not available for ${stdenv.hostPlatform.system}");
+  asset =
+    assets.${stdenv.hostPlatform.system}
+      or (throw "hunk is not available for ${stdenv.hostPlatform.system}");
 in
 stdenv.mkDerivation {
   pname = "hunk";
