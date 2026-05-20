@@ -156,6 +156,7 @@ in
     enable = true;
     enableFishIntegration = true;
     settings = {
+      command_timeout = 1000;
       nix_shell.symbol = "❄️ ";
       custom.jj = {
         when = "jj-starship detect";
