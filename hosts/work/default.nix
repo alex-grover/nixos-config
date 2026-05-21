@@ -1,10 +1,10 @@
-{ lib, user, ... }:
+{ lib, ... }:
 {
   homebrew.casks = [
     "linear-linear"
   ];
 
   system.defaults.dock.persistent-apps = lib.mkOrder 1250 [
-    "/Users/${user}/Applications/Home Manager Apps/Slack.app"
+    "/Applications/Slack.app"
   ];
 }
