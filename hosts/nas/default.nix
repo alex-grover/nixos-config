@@ -385,6 +385,9 @@ in
         after = [ "zfs-import-data.service" ];
         before = [ "zfs-mount.service" ];
         requiredBy = [ "zfs-mount.service" ];
+        # This runs before local-fs/sysinit via zfs-mount; the default
+        # After=sysinit.target creates an ordering cycle with tmpfiles.
+        unitConfig.DefaultDependencies = false;
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
