@@ -12,6 +12,7 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  programs.zsh.enable = false;
 
   nix-homebrew = {
     enable = true;
