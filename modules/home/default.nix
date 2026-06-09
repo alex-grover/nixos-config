@@ -149,6 +149,7 @@ in
   programs.nnn = {
     enable = true;
     enableFishIntegration = true;
+    options.e = true;
     quitcd = true;
   };
 
