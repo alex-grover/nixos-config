@@ -6,6 +6,52 @@
 }:
 let
   hunk = pkgs.callPackage ../../pkgs/hunk.nix { };
+  nnnOpener = pkgs.writeShellScriptBin "nnn-opener" ''
+    target=$1
+    mime=$(${pkgs.file}/bin/file -biL -- "$target")
+    editor=''${VISUAL:-''${EDITOR:-vi}}
+    desktop_opener=''${NNN_DESKTOP_OPENER:-/usr/bin/open}
+
+    edit() {
+      # Allow simple editor commands with arguments, e.g. VISUAL='hx --log /tmp/hx.log'.
+      # shellcheck disable=SC2086
+      exec $editor "$target"
+    }
+
+    open_desktop() {
+      exec "$desktop_opener" "$target"
+    }
+
+    case "$mime" in
+      text/* | \
+      application/ecmascript* | \
+      application/javascript* | \
+      application/json* | \
+      application/toml* | \
+      application/typescript* | \
+      application/xml* | \
+      application/x-ecmascript* | \
+      application/x-javascript* | \
+      application/x-typescript* | \
+      application/x-yaml*)
+        edit
+        ;;
+      image/* | audio/* | video/* | application/pdf*)
+        open_desktop
+        ;;
+    esac
+
+    case "$target" in
+      *.bash | *.c | *.cc | *.conf | *.cpp | *.css | *.env | *.fish | *.go | \
+      *.h | *.hpp | *.html | *.js | *.jsx | *.jsonc | *.lua | *.md | *.mdx | \
+      *.mjs | *.nix | *.rs | *.sh | *.toml | *.ts | *.tsx | *.txt | *.xml | \
+      *.yaml | *.yml | *.zsh)
+        edit
+        ;;
+    esac
+
+    open_desktop
+  '';
 in
 {
   programs.home-manager.enable = true;
@@ -22,6 +68,7 @@ in
   home.sessionVariables = {
     ADBLOCK = "1";
     DISABLE_OPENCOLLECTIVE = "true";
+    NNN_OPENER = "${nnnOpener}/bin/nnn-opener";
   };
 
   programs.bat.enable = true;
@@ -149,7 +196,7 @@ in
   programs.nnn = {
     enable = true;
     enableFishIntegration = true;
-    options.e = true;
+    options.c = true;
     quitcd = true;
   };
 
