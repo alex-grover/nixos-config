@@ -12,6 +12,8 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  documentation.enable = false;
+  system.tools.darwin-uninstaller.enable = false;
   programs.zsh.enable = false;
 
   nix-homebrew = {
