@@ -8,6 +8,7 @@
 
     masApps = {
       "Copilot" = 1447330651;
+      "Infuse" = 1136220934;
       "Photomator" = 1444636541;
       "Tailscale" = 1475387142;
     };

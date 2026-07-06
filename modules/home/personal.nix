@@ -1,9 +1,5 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  home.packages = [
-    pkgs.iina
-  ];
-
   home.file.".pi/agent/models.json".text = builtins.toJSON {
     providers.ollama = {
       baseUrl = "http://localhost:11434/v1";
