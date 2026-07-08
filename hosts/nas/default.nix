@@ -379,6 +379,8 @@ in
       serviceConfig.UMask = lib.mkForce "0002";
     })
     // {
+      zfs-mount.restartIfChanged = false;
+
       zfs-load-key-data-media = {
         description = "Load ZFS encryption key for data/media";
         requires = [ "zfs-import-data.service" ];
