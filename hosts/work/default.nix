@@ -1,6 +1,8 @@
 { lib, ... }:
 {
   homebrew.casks = [
+    "claude-code"
+    "codex"
     "linear-linear"
     "okta-verify"
   ];

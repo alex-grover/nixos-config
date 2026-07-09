@@ -37,6 +37,7 @@
   homebrew = {
     enable = true;
     taps = builtins.attrNames config.nix-homebrew.taps;
+    global.autoUpdate = false;
 
     casks = [
       "logi-options+"
@@ -50,6 +51,7 @@
 
     onActivation = {
       cleanup = "zap";
+      upgrade = true;
     };
   };
 

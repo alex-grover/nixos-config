@@ -12,7 +12,10 @@
     agenix.inputs.home-manager.follows = "home-manager";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-homebrew = {
+      url = "github:zhaofengli/nix-homebrew";
+      inputs.brew-src.url = "github:Homebrew/brew/6.0.9";
+    };
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
