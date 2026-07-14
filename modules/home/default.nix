@@ -5,7 +5,6 @@
   ...
 }:
 let
-  hunk = pkgs.callPackage ../../pkgs/hunk.nix { };
   nnnOpener = pkgs.writeShellScriptBin "nnn-opener" ''
     target=$1
     mime=$(${pkgs.file}/bin/file -biL -- "$target")
@@ -60,7 +59,7 @@ in
 
   home.packages = [
     pkgs.fd
-    hunk
+    pkgs.hunk
     pkgs.jj-starship
     pkgs.ripgrep
   ];
