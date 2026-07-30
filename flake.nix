@@ -27,16 +27,7 @@
   };
 
   outputs =
-    inputs@{
-      self,
-      nixpkgs,
-      nix-darwin,
-      home-manager,
-      nix-homebrew,
-      homebrew-core,
-      homebrew-cask,
-      ...
-    }:
+    inputs@{ nixpkgs, ... }:
     let
       user = "alex";
 

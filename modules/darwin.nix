@@ -42,7 +42,6 @@
     casks = [
       "logi-options+"
       "tailscale-app"
-      "webstorm"
     ];
 
     masApps = {
@@ -103,7 +102,7 @@
           "/System/Applications/Reminders.app"
           "/System/Applications/Notes.app"
           "/System/Applications/Messages.app"
-          "/Applications/WebStorm.app"
+          "/Users/${user}/Applications/Home Manager Apps/WebStorm.app"
           "/Users/${user}/Applications/Home Manager Apps/Ghostty.app"
         ]
         (lib.mkAfter [

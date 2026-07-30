@@ -21,6 +21,13 @@ let
       inputs.home-manager.darwinModules.home-manager
     else
       inputs.home-manager.nixosModules.home-manager;
+
+  hostHomeModule = ../modules/home + "/${name}.nix";
+  homeModules = [
+    ../modules/home
+    ../modules/home/${platform}.nix
+  ]
+  ++ nixpkgs.lib.optional (builtins.pathExists hostHomeModule) hostHomeModule;
 in
 systemFunc {
   specialArgs = {
@@ -46,13 +53,7 @@ systemFunc {
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
-      home-manager.users.${user} = {
-        imports = [
-          ../modules/home
-          ../modules/home/${platform}.nix
-          ../modules/home/${name}.nix
-        ];
-      };
+      home-manager.users.${user}.imports = homeModules;
       home-manager.extraSpecialArgs = {
         inherit
           inputs

@@ -1,4 +1,4 @@
-{ pkgs, configPath, ... }:
+{ pkgs, ... }:
 {
   home.packages = [
     pkgs.ghostty.terminfo

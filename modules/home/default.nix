@@ -77,9 +77,6 @@ in
     enableFishIntegration = true;
     nix-direnv.enable = true;
     silent = true;
-    package = pkgs.direnv.overrideAttrs (_: {
-      doCheck = false;
-    });
   };
 
   programs.eza = {
