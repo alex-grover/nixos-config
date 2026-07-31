@@ -1,4 +1,7 @@
 { pkgs, ... }:
 {
-  home.packages = [ pkgs.linear ];
+  home.packages = [
+    pkgs.herdr
+    pkgs.linear
+  ];
 }
