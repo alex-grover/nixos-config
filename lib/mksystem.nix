@@ -12,7 +12,7 @@
 let
   isDarwin = nixpkgs.lib.hasSuffix "darwin" system;
   platform = if isDarwin then "darwin" else "nixos";
-  configPath = if isDarwin then /etc/nix-darwin else /etc/nixos;
+  configPath = if isDarwin then "/etc/nix-darwin" else "/etc/nixos";
 
   systemFunc = if isDarwin then inputs.nix-darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
 
