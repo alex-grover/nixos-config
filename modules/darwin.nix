@@ -54,14 +54,6 @@
     };
   };
 
-  launchd.user.agents.ollama = {
-    command = "${pkgs.ollama}/bin/ollama serve";
-    serviceConfig = {
-      KeepAlive = true;
-      RunAtLoad = true;
-    };
-  };
-
   system.startup.chime = false;
   system.defaults = {
     CustomUserPreferences = {

@@ -4,17 +4,14 @@
   system,
   ...
 }:
-let
-  pi-coding-agent = pkgs.callPackage ../../pkgs/pi-coding-agent.nix { };
-in
 {
   home.packages = [
     inputs.agenix.packages.${system}.default
     pkgs.alcove
+    pkgs.herdr
     pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
-    pkgs.ollama
-    pi-coding-agent
+    pkgs.pi-coding-agent
     pkgs.raycast
     pkgs.spotify
   ];
