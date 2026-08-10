@@ -85,6 +85,7 @@
             type = "zfs_fs";
             mountpoint = "/data/media";
             options = {
+              canmount = "noauto";
               recordsize = "1M";
               encryption = "aes-256-gcm";
               keyformat = "passphrase";
@@ -95,7 +96,10 @@
           torrents = {
             type = "zfs_fs";
             mountpoint = "/data/torrents";
-            options.recordsize = "1M";
+            options = {
+              canmount = "noauto";
+              recordsize = "1M";
+            };
           };
         };
       };
