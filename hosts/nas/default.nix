@@ -63,6 +63,7 @@ in
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.forceImportRoot = false;
   networking.hostId = "cb3aedbe";
+  networking.networkmanager.enable = true;
 
   services.fstrim.enable = true;
 

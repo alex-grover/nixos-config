@@ -16,8 +16,6 @@ in
 
   time.timeZone = "America/New_York";
 
-  networking.useDHCP = true;
-
   security.sudo.wheelNeedsPassword = false;
 
   services.openssh = {
