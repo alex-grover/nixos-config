@@ -11,8 +11,8 @@
     pkgs.herdr
     pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
-    pkgs.raycast
     pkgs.spotify
+    pkgs.tinycast
   ];
 
   programs.ghostty = {
