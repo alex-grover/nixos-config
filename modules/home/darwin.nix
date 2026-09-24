@@ -29,8 +29,8 @@
     extraPackages = [ pkgs.nodejs ];
     settings = {
       lastChangelogVersion = pkgs.pi-coding-agent.version;
-      defaultProvider = "openai-codex";
-      defaultModel = "gpt-5.6-sol";
+      defaultProvider = "vercel-ai-gateway";
+      defaultModel = "openai/gpt-6-astra";
       defaultThinkingLevel = "high";
       packages = [
         "npm:pi-web-access@0.18.0"
