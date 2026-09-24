@@ -50,5 +50,11 @@
     };
   };
 
-  home.file.".hushlogin".text = "";
+  home.file = {
+    ".agents/skills" = {
+      source = ../../skills;
+      recursive = true;
+    };
+    ".hushlogin".text = "";
+  };
 }
