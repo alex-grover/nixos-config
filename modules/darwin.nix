@@ -24,6 +24,8 @@
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
     };
     mutableTaps = false;
+    # Required by Homebrew, but not yet exported by nix-homebrew's launcher.
+    extraEnv.HOMEBREW_ORIGINAL_BREW_FILE = "${config.nix-homebrew.defaultArm64Prefix}/bin/brew";
   };
 
   system.stateVersion = 6;

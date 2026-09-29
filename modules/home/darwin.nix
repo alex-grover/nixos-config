@@ -26,15 +26,15 @@
 
   programs.pi-coding-agent = {
     enable = true;
+    package = pkgs.callPackage ../../pkgs/pi-coding-agent { };
     extraPackages = [ pkgs.nodejs ];
     settings = {
-      lastChangelogVersion = pkgs.pi-coding-agent.version;
       defaultProvider = "vercel-ai-gateway";
-      defaultModel = "openai/gpt-6-astra";
+      defaultModel = "openai/gpt-6.1-sol";
       defaultThinkingLevel = "high";
       packages = [
-        "npm:pi-web-access@0.18.0"
-        "npm:@plannotator/pi-extension@0.26.1"
+        "npm:pi-web-access@0.33.0"
+        "npm:@plannotator/pi-extension@0.27.22"
       ];
       theme = "dark";
     };
