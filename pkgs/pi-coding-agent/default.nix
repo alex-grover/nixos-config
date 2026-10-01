@@ -9,11 +9,11 @@
 }:
 buildNpmPackage (finalAttrs: {
   pname = "pi-coding-agent";
-  version = "0.99.1";
+  version = "1.0.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-${finalAttrs.version}.tgz";
-    hash = "sha256-ZoZZKtrqGQkshclPXUAyPb89sUHpDrPt6enocwKr3R0=";
+    hash = "sha256-Y47Tq75U73DL+Gc65LxTHnkWE3VqrARkTPzcxK8Pr68=";
   };
 
   # Upstream's shrinkwrap omits integrity hashes for its own workspace packages.
@@ -30,7 +30,7 @@ buildNpmPackage (finalAttrs: {
     mv npm-shrinkwrap.json.tmp npm-shrinkwrap.json
   '';
 
-  npmDepsHash = "sha256-W3nbpczNYv2wjMWp3IZCOqZ5Uv4i4KOhi50lQ6WHFF4=";
+  npmDepsHash = "sha256-gSAAY8ehyyzlVSj6E7YCTezZ4cL3MTIiwKdC+O1OnCQ=";
   npmFlags = [ "--ignore-scripts" ];
   dontNpmBuild = true;
 
