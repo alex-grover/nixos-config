@@ -67,6 +67,7 @@ in
   home.sessionVariables = {
     ADBLOCK = "1";
     DISABLE_OPENCOLLECTIVE = "true";
+    HUNK_TEXT_PAGER = "less -FRXK";
     NNN_OPENER = "${nnnOpener}/bin/nnn-opener";
   };
 
@@ -208,6 +209,25 @@ in
         format = "$output ";
       };
     };
+  };
+
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    shell = "${pkgs.fish}/bin/fish";
+    terminal = "tmux-256color";
+    secureSocket = false;
+    extraConfig = ''
+      set -g status off
+      set -g copy-mode-position-format ""
+      set -g pane-border-indicators off
+      set -g pane-border-style 'fg=#3a3a3a'
+      set -g pane-active-border-style 'fg=#3a3a3a'
+      set -s default-client-command 'new-session -A -s main'
+      set -s extended-keys on
+      set -s extended-keys-format csi-u
+      set -s set-clipboard on
+    '';
   };
 
   programs.zoxide = {

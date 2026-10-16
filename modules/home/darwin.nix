@@ -23,14 +23,6 @@
     };
   };
 
-  programs.herdr = {
-    enable = true;
-    settings = {
-      onboarding = false;
-      ui.copy_on_select = false;
-    };
-  };
-
   programs.pi-coding-agent = {
     enable = true;
     package = pkgs.callPackage ../../pkgs/pi-coding-agent { };

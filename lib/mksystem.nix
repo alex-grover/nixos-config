@@ -41,7 +41,10 @@ systemFunc {
 
   modules = [
     {
-      nix.settings.experimental-features = "nix-command flakes";
+      nix.settings.experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
       nixpkgs.hostPlatform = system;
       system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
       networking.hostName = name;
