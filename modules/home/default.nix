@@ -166,6 +166,7 @@ in
 
       templates = {
         git_push_bookmark = "\"alex/\" ++ change_id.shortest(8)";
+        log = "builtin_log_compact ++ diff.summary()";
       };
 
       revsets = {
