@@ -5,11 +5,13 @@
   ...
 }:
 let
+  defaultDesktopOpener = if pkgs.stdenv.hostPlatform.isDarwin then "/usr/bin/open" else "";
+
   nnnOpener = pkgs.writeShellScriptBin "nnn-opener" ''
     target=$1
     mime=$(${pkgs.file}/bin/file -biL -- "$target")
     editor=''${VISUAL:-''${EDITOR:-vi}}
-    desktop_opener=''${NNN_DESKTOP_OPENER:-/usr/bin/open}
+    desktop_opener=''${NNN_DESKTOP_OPENER:-${defaultDesktopOpener}}
 
     edit() {
       # Allow simple editor commands with arguments, e.g. VISUAL='hx --log /tmp/hx.log'.
@@ -18,6 +20,10 @@ let
     }
 
     open_desktop() {
+      if [ -z "$desktop_opener" ]; then
+        printf 'nnn-opener: cannot open non-text file: %s\nSet NNN_DESKTOP_OPENER to use a custom opener.\n' "$target" >&2
+        exit 1
+      fi
       exec "$desktop_opener" "$target"
     }
 
