@@ -168,9 +168,8 @@ in
       }
       map global user l ':enter-user-mode lsp<ret>' -docstring 'LSP'
 
-      define-command yank-system -docstring 'Copy selections to the system clipboard' %{
+      define-command -hidden -params 1.. copy-system %{
         nop %sh{
-          eval set -- "$kak_quoted_selections"
           copy() {
             printf '%s' "$1"
             shift
@@ -185,6 +184,9 @@ in
           fi
         }
       }
+      define-command yank-system -docstring 'Copy selections to the system clipboard' %{
+        copy-system %val{selections}
+      }
       define-command paste-system -docstring 'Paste the system clipboard after selections' %{
         evaluate-commands %sh{
           if [ -n "$kak_client_env_SSH_CONNECTION" ] || ! command -v pbpaste >/dev/null 2>&1; then
@@ -196,6 +198,43 @@ in
       }
       map global user y ':yank-system<ret>' -docstring 'Copy to system clipboard'
       map global user p ':paste-system<ret>' -docstring 'Paste system clipboard'
+
+      define-command yank-github-link -docstring 'Copy a GitHub link at the nearest known pushed ancestor for the main selected lines' %{
+        evaluate-commands %sh{
+          fail() { printf "fail '%s'\n" "$1"; exit 0; }
+          jj_read() { jj --ignore-working-copy --at-operation=@ --no-pager --color=never "$@"; }
+          case "$kak_buffile" in /*) ;; *) fail 'Select lines in a file buffer.' ;; esac
+          dir=''${kak_buffile%/*}; path=''${kak_buffile##*/}
+          [ -n "$dir" ] || dir=/
+          while [ ! -d "$dir" ]; do
+            path=''${dir##*/}/$path; dir=''${dir%/*}
+            [ -n "$dir" ] || dir=/
+          done
+          cd -P "$dir" 2>/dev/null || fail 'Cannot access the file directory.'
+          root=$(jj_read workspace root 2>/dev/null) || fail 'File is outside a jj workspace.'
+          here=$(pwd -P); root=''${root%/}; path=''${here%/}/$path
+          case "$path" in "$root"/*) path=''${path#"$root"/} ;; *) fail 'File is outside the workspace root.' ;; esac
+          revision='latest(heads((::@ & ::remote_bookmarks(remote=origin)) ~ root()))'
+          base=$(jj_read log -r "$revision" --no-graph -T 'git_web_url() ++ "/blob/" ++ commit_id') || fail 'Cannot resolve a pushed jj revision.'
+          [ -n "$base" ] || fail 'No pushed ancestor is known on origin. Run jj git fetch first.'
+          case "$base" in https://github.com/*/blob/*) ;; *) fail 'A GitHub origin is required.' ;; esac
+          path=$(printf '%s' "$path" | od -An -v -tu1 | awk '{
+            for (i=1; i<=NF; i++) {
+              n=$i
+              if ((n>=65 && n<=90) || (n>=97 && n<=122) || (n>=48 && n<=57) || n==45 || n==46 || n==47 || n==95 || n==126)
+                printf "%c", n
+              else printf "%%%02X", n
+            }
+          }')
+          first=''${kak_selection_desc%%.*}; last=''${kak_selection_desc#*,}; last=''${last%%.*}
+          if [ "$first" -gt "$last" ]; then swap=$first; first=$last; last=$swap; fi
+          range=L$first
+          [ "$first" -eq "$last" ] || range=$range-L$last
+          quote="'"
+          printf "copy-system '%s'\n" "$(printf '%s' "$base/$path#$range" | sed "s/$quote/$quote$quote/g")"
+        }
+      }
+      map global user g ':yank-github-link<ret>' -docstring 'Copy GitHub link'
 
       define-command file-picker %{
         prompt -menu -shell-script-candidates 'fd --type f --hidden --no-require-git --exclude .jj --exclude .git' 'file: ' %{ edit -existing %val{text} }
