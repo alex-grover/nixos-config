@@ -73,7 +73,6 @@ in
   home.packages = [
     pkgs.fd
     pkgs.hunk
-    pkgs.jj-starship
     pkgs.ripgrep
     pkgs.typescript-language-server
   ];
@@ -313,11 +312,42 @@ in
     enableFishIntegration = true;
     settings = {
       command_timeout = 1000;
+      format = "$directory$vcs$nix_shell$cmd_duration$line_break$jobs$status$character";
       nix_shell.symbol = "❄️ ";
-      custom.jj = {
-        when = "jj-starship detect";
-        shell = [ "jj-starship" ];
-        format = "$output ";
+      vcs = {
+        order = [
+          "jj"
+          "git"
+        ];
+        git_modules = "$git_branch$git_commit$git_state$git_status";
+        jj_modules = "$jj_change\${custom.jj_distance}([\\[$jj_status\${custom.jj_state}\\]](red) )";
+      };
+      jj_change = {
+        change_hash_length = 8;
+        prefix_style = "bright-purple";
+        suffix_style = "bright-black";
+        format = "on [󱗆](blue) $change ";
+      };
+      jj_status = {
+        # The outer brackets live in vcs.jj_modules so native and custom flags
+        # share one status group. The native module supplies ! for conflicts.
+        format = "$conflicted";
+      };
+      custom = {
+        jj_distance = {
+          # Invoked only after $vcs has detected a JJ repository.
+          # Read the existing snapshot without creating operations.
+          when = true;
+          shell = [ "sh" ];
+          command = "${pkgs.runtimeShell} ${./starship-jj.sh} bookmarks";
+          format = "([\\($output\\)](green) )";
+        };
+        jj_state = {
+          when = true;
+          shell = [ "sh" ];
+          command = "${pkgs.runtimeShell} ${./starship-jj.sh} state";
+          format = "$output";
+        };
       };
     };
   };
