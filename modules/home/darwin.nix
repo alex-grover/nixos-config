@@ -8,7 +8,6 @@
   home.packages = [
     inputs.agenix.packages.${system}.default
     pkgs.alcove
-    pkgs.herdr
     pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
     pkgs.spotify
@@ -21,6 +20,14 @@
     package = pkgs.ghostty-bin;
     settings = {
       theme = "Ayu";
+    };
+  };
+
+  programs.herdr = {
+    enable = true;
+    settings = {
+      onboarding = false;
+      ui.copy_on_select = false;
     };
   };
 
@@ -37,6 +44,7 @@
         "npm:@plannotator/pi-extension@0.27.22"
       ];
       theme = "dark";
+      tuiMode = "regular";
     };
   };
 
