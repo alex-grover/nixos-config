@@ -14,7 +14,7 @@ let
     desktop_opener=''${NNN_DESKTOP_OPENER:-${defaultDesktopOpener}}
 
     edit() {
-      # Allow simple editor commands with arguments, e.g. VISUAL='hx --log /tmp/hx.log'.
+      # Allow simple editor commands with arguments, e.g. VISUAL='kak -c main'.
       # shellcheck disable=SC2086
       exec $editor "$target"
     }
@@ -68,6 +68,7 @@ in
     pkgs.hunk
     pkgs.jj-starship
     pkgs.ripgrep
+    pkgs.typescript-language-server
   ];
 
   home.sessionVariables = {
@@ -128,24 +129,78 @@ in
 
   programs.git.enable = true;
 
-  programs.helix = {
+  programs.kakoune = {
     enable = true;
     defaultEditor = true;
-    settings = {
-      theme = "ayu_dark";
-      editor = {
-        auto-format = true;
-        bufferline = "multiple";
-        color-modes = true;
-        cursorline = true;
-        line-number = "relative";
-        file-picker = {
-          hidden = false;
-          ignore = true;
-          git-ignore = true;
-        };
-      };
-    };
+    plugins = [
+      pkgs.kakounePlugins.kakoune-lsp
+    ];
+    colorSchemePackage = pkgs.kakounePlugins.kakoune-catppuccin;
+    config.colorScheme = "catppuccin_mocha";
+    extraConfig = ''
+      alias global bd delete-buffer
+      alias global bd! delete-buffer!
+      add-highlighter global/ number-lines -relative -hlcursor -min-digits 4 -separator '  '
+      eval %sh{kak-lsp}
+      set-face global DiagnosticError default,default,rgb:f38ba8+c
+      set-face global DiagnosticWarning default,default,rgb:f9e2af+c
+      add-highlighter global/cursor-line line '%val{cursor_line}' default,rgb:313244
+      set-option global modelinefmt '{{mode_info}} %val{bufname} %val{cursor_line}:%val{cursor_char_column} {{context_info}}'
+
+      hook global WinSetOption filetype=(javascript|typescript) %{
+        lsp-enable-window
+        hook -group semantic-tokens window BufReload .* lsp-semantic-tokens
+        hook -group semantic-tokens window NormalIdle .* lsp-semantic-tokens
+        hook -group semantic-tokens window InsertIdle .* lsp-semantic-tokens
+        hook -once -always window WinSetOption filetype=.* %{
+          remove-hooks window semantic-tokens
+        }
+      }
+      map global user l ':enter-user-mode lsp<ret>' -docstring 'LSP'
+
+      define-command yank-system -docstring 'Copy selections to the system clipboard' %{
+        nop %sh{
+          eval set -- "$kak_quoted_selections"
+          copy() {
+            printf '%s' "$1"
+            shift
+            for selection do printf '\n%s' "$selection"; done
+          }
+          if [ -z "$kak_client_env_SSH_CONNECTION" ] && command -v pbcopy >/dev/null 2>&1; then
+            copy "$@" | pbcopy
+          else
+            tty=$(ps -o tty= -p "$kak_client_pid" | tr -d '[:space:]')
+            [ -n "$tty" ] && [ "$tty" != '?' ] || exit 1
+            printf '\033]52;c;%s\007' "$(copy "$@" | base64 | tr -d '\n')" > "/dev/$tty"
+          fi
+        }
+      }
+      define-command paste-system -docstring 'Paste the system clipboard after selections' %{
+        evaluate-commands %sh{
+          if [ -n "$kak_client_env_SSH_CONNECTION" ] || ! command -v pbpaste >/dev/null 2>&1; then
+            printf '%s\n' "fail 'On a remote/headless host, enter insert mode and use terminal paste.'"
+          else
+            printf '%s\n' 'execute-keys -draft "<a-!>pbpaste<ret>"'
+          fi
+        }
+      }
+      map global user y ':yank-system<ret>' -docstring 'Copy to system clipboard'
+      map global user p ':paste-system<ret>' -docstring 'Paste system clipboard'
+
+      define-command file-picker %{
+        prompt -menu -shell-script-candidates 'fd --type f --hidden --no-require-git --exclude .jj --exclude .git' 'file: ' %{ edit -existing %val{text} }
+      }
+      define-command buffer-picker %{
+        prompt -menu -buffer-completion 'buffer: ' %{ buffer %val{text} }
+      }
+      set-option global grepcmd %{rg --vimgrep --smart-case --hidden --no-require-git --glob '!.jj/**' --glob '!.git/**'}
+      define-command project-search %{
+        prompt 'search: ' %{ grep -- %val{text} . }
+      }
+      map global user f ':file-picker<ret>' -docstring 'Find file'
+      map global user b ':buffer-picker<ret>' -docstring 'Switch buffer'
+      map global user / ':project-search<ret>' -docstring 'Search project'
+    '';
   };
 
   programs.jujutsu = {
