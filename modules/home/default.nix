@@ -10,8 +10,8 @@ let
   jjGutter = pkgs.callPackage (pkgs.fetchFromGitHub {
     owner = "alex-grover";
     repo = "jj-gutter.kak";
-    rev = "6c64095962f0996bbf467125694c1213cd5bb4e2";
-    hash = "sha256-aGR0a0FFnmngwNvh9QvPoofjuSV62urjWt5jZCCStH0=";
+    rev = "180a14df34a093cd2bcd6d0603b5852893eb8dd6";
+    hash = "sha256-C4h5aiKXkZRCTSVORxrLxNjFevaNmPBHGNvpicV0lMU=";
   }) { };
 
   nnnOpener = pkgs.writeShellScriptBin "nnn-opener" ''

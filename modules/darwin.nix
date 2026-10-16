@@ -42,6 +42,7 @@
     global.autoUpdate = false;
 
     casks = [
+      "alcove"
       "logi-options+"
       "tailscale-app"
     ];

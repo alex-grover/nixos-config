@@ -7,7 +7,6 @@
 {
   home.packages = [
     inputs.agenix.packages.${system}.default
-    pkgs.alcove
     pkgs.jetbrains.webstorm
     pkgs.nerd-fonts.jetbrains-mono
     pkgs.spotify
