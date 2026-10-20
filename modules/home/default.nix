@@ -7,6 +7,13 @@
 let
   defaultDesktopOpener = if pkgs.stdenv.hostPlatform.isDarwin then "/usr/bin/open" else "";
 
+  jjGutter = pkgs.callPackage (pkgs.fetchFromGitHub {
+    owner = "alex-grover";
+    repo = "jj-gutter.kak";
+    rev = "6c64095962f0996bbf467125694c1213cd5bb4e2";
+    hash = "sha256-aGR0a0FFnmngwNvh9QvPoofjuSV62urjWt5jZCCStH0=";
+  }) { };
+
   nnnOpener = pkgs.writeShellScriptBin "nnn-opener" ''
     target=$1
     mime=$(${pkgs.file}/bin/file -biL -- "$target")
@@ -134,6 +141,7 @@ in
     defaultEditor = true;
     plugins = [
       pkgs.kakounePlugins.kakoune-lsp
+      jjGutter
     ];
     colorSchemePackage = pkgs.kakounePlugins.kakoune-catppuccin;
     config.colorScheme = "catppuccin_mocha";
@@ -146,6 +154,8 @@ in
       set-face global DiagnosticWarning default,default,rgb:f9e2af+c
       add-highlighter global/cursor-line line '%val{cursor_line}' default,rgb:313244
       set-option global modelinefmt '{{mode_info}} %val{bufname} %val{cursor_line}:%val{cursor_char_column} {{context_info}}'
+      jj-enable
+      alias global jjb jj-blame-toggle
 
       hook global WinSetOption filetype=(javascript|typescript) %{
         lsp-enable-window
