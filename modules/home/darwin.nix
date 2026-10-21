@@ -18,7 +18,7 @@
     enableFishIntegration = true;
     package = pkgs.ghostty-bin;
     settings = {
-      theme = "Ayu";
+      theme = "Monokai Remastered";
     };
   };
 

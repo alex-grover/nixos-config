@@ -131,6 +131,8 @@ in
     enableFishIntegration = false;
   };
 
+  xdg.configFile."kak/colors/monokai_extended.kak".source = ./kakoune/monokai_extended.kak;
+
   programs.gh.enable = true;
 
   programs.git.enable = true;
@@ -142,16 +144,13 @@ in
       pkgs.kakounePlugins.kakoune-lsp
       jjGutter
     ];
-    colorSchemePackage = pkgs.kakounePlugins.kakoune-catppuccin;
-    config.colorScheme = "catppuccin_mocha";
+    config.colorScheme = "monokai_extended";
     extraConfig = ''
       alias global bd delete-buffer
       alias global bd! delete-buffer!
       add-highlighter global/ number-lines -relative -hlcursor -min-digits 4 -separator '  '
       eval %sh{kak-lsp}
-      set-face global DiagnosticError default,default,rgb:f38ba8+c
-      set-face global DiagnosticWarning default,default,rgb:f9e2af+c
-      add-highlighter global/cursor-line line '%val{cursor_line}' default,rgb:313244
+      add-highlighter global/cursor-line line '%val{cursor_line}' CursorLine
       set-option global modelinefmt '{{mode_info}} %val{bufname} %val{cursor_line}:%val{cursor_char_column} {{context_info}}'
       jj-enable
       alias global jjb jj-blame-toggle
