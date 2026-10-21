@@ -71,8 +71,8 @@ in
   home.username = user;
 
   home.packages = [
+    pkgs.delta
     pkgs.fd
-    pkgs.hunk
     pkgs.ripgrep
     pkgs.typescript-language-server
   ];
@@ -80,7 +80,7 @@ in
   home.sessionVariables = {
     ADBLOCK = "1";
     DISABLE_OPENCOLLECTIVE = "true";
-    HUNK_TEXT_PAGER = "less -FRXK";
+    DELTA_PAGER = "less -FRXK";
     NNN_OPENER = "${nnnOpener}/bin/nnn-opener";
   };
 
@@ -287,8 +287,12 @@ in
         diff-formatter = ":git";
         merge-editor = ":builtin";
         pager = [
-          "hunk"
-          "pager"
+          "delta"
+          "--paging=always"
+          "--line-numbers"
+          "--navigate"
+          "--file-modified-label=modified: "
+          "--navigate-regex=^(modified:|added:|removed:|renamed:|copied:)"
         ];
       };
     };
