@@ -73,6 +73,7 @@ in
   home.packages = [
     pkgs.delta
     pkgs.fd
+    pkgs.marksman
     pkgs.ripgrep
     pkgs.typescript-language-server
   ];
@@ -163,6 +164,10 @@ in
         hook -once -always window WinSetOption filetype=.* %{
           remove-hooks window semantic-tokens
         }
+      }
+      hook global WinSetOption filetype=markdown %{
+        set-option window indentwidth 2
+        lsp-enable-window
       }
       map global user l ':enter-user-mode lsp<ret>' -docstring 'LSP'
 
