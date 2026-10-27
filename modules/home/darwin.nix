@@ -13,15 +13,6 @@
     pkgs.tinycast
   ];
 
-  programs.ghostty = {
-    enable = true;
-    enableFishIntegration = true;
-    package = pkgs.ghostty-bin;
-    settings = {
-      theme = "Monokai Remastered";
-    };
-  };
-
   programs.pi-coding-agent = {
     enable = true;
     package = pkgs.callPackage ../../pkgs/pi-coding-agent { };

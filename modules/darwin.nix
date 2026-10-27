@@ -95,10 +95,7 @@
           "/System/Applications/Mail.app"
           "/System/Cryptexes/App/System/Applications/Safari.app"
           "/System/Applications/Reminders.app"
-          "/System/Applications/Notes.app"
           "/System/Applications/Messages.app"
-          "/Users/${user}/Applications/Home Manager Apps/WebStorm.app"
-          "/Users/${user}/Applications/Home Manager Apps/Ghostty.app"
         ]
         (lib.mkAfter [
           "/Users/${user}/Applications/Home Manager Apps/Spotify.app"

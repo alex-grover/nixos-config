@@ -22,11 +22,10 @@ let
     else
       inputs.home-manager.nixosModules.home-manager;
 
+  platformHomeModule = ../modules/home + "/${platform}.nix";
   hostHomeModule = ../modules/home + "/${name}.nix";
-  homeModules = [
-    ../modules/home
-    ../modules/home/${platform}.nix
-  ]
+  homeModules = [ ../modules/home ]
+  ++ nixpkgs.lib.optional (builtins.pathExists platformHomeModule) platformHomeModule
   ++ nixpkgs.lib.optional (builtins.pathExists hostHomeModule) hostHomeModule;
 in
 systemFunc {
