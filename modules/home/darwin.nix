@@ -7,8 +7,6 @@
 {
   home.packages = [
     inputs.agenix.packages.${system}.default
-    pkgs.jetbrains.webstorm
-    pkgs.nerd-fonts.jetbrains-mono
     pkgs.spotify
     pkgs.tinycast
   ];
@@ -23,7 +21,6 @@
       defaultThinkingLevel = "high";
       packages = [
         "npm:pi-web-access@0.33.0"
-        "npm:@plannotator/pi-extension@0.27.22"
       ];
       theme = "dark";
       tuiMode = "regular";
