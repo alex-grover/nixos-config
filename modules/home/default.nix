@@ -320,7 +320,7 @@ in
     enableFishIntegration = true;
     settings = {
       command_timeout = 1000;
-      format = "$directory$vcs$nix_shell$cmd_duration$line_break$jobs$status$character";
+      format = "$username$hostname$directory$vcs$nix_shell$cmd_duration$line_break$jobs$status$character";
       nix_shell.symbol = "❄️ ";
       vcs = {
         order = [
