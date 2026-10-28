@@ -1,5 +1,6 @@
 {
   pkgs,
+  config,
   inputs,
   user,
   ...
@@ -8,9 +9,20 @@ let
   keys = import ../lib/keys.nix;
 in
 {
-  imports = [ inputs.agenix.nixosModules.default ];
+  imports = [
+    inputs.agenix.nixosModules.default
+    inputs.rex.nixosModules.default
+  ];
 
   age.identityPaths = [ "/home/${user}/.ssh/id_ed25519" ];
+  age.secrets.rex-netrc.file = ../secrets/rex-netrc.age;
+
+  nix.settings.netrc-file = config.age.secrets.rex-netrc.path;
+  services.rex.loginServer = {
+    enable = true;
+    tailscaleServe.enable = true;
+    accounts.${user}.principals = [ "tailscale:hello@alexgrover.me" ];
+  };
 
   system.stateVersion = "25.11";
 
