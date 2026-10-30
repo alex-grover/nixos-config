@@ -321,7 +321,7 @@ in
     settings = {
       command_timeout = 1000;
       format = "$username$hostname$directory$vcs$nix_shell$cmd_duration$line_break$jobs$status$character";
-      nix_shell.symbol = "❄️ ";
+      nix_shell.format = "via [\\($name\\)]($style) ";
       vcs = {
         order = [
           "jj"
