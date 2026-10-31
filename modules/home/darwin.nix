@@ -1,12 +1,9 @@
 {
   pkgs,
-  inputs,
-  system,
   ...
 }:
 {
   home.packages = [
-    inputs.agenix.packages.${system}.default
     pkgs.spotify
     pkgs.tinycast
   ];

@@ -1,5 +1,7 @@
 {
   pkgs,
+  inputs,
+  system,
   user,
   configPath,
   ...
@@ -71,6 +73,7 @@ in
   home.username = user;
 
   home.packages = [
+    inputs.agenix.packages.${system}.default
     pkgs.delta
     pkgs.fd
     pkgs.marksman

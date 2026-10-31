@@ -11,6 +11,6 @@ in
 builtins.listToAttrs (
   map (s: {
     name = s;
-    value.publicKeys = builtins.attrValues keys.age;
+    value.publicKeys = builtins.attrValues keys;
   }) secrets
 )
