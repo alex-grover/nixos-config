@@ -102,9 +102,9 @@
           "/System/Applications/System Settings.app"
         ])
       ];
-      wvous-br-corner = 2;
+      wvous-br-corner = 4;
       wvous-tl-corner = 10;
-      wvous-tr-corner = 4;
+      wvous-tr-corner = 2;
     };
     finder = {
       FXPreferredViewStyle = "clmv";
