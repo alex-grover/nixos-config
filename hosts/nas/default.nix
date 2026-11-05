@@ -130,13 +130,20 @@ in
           mode = "2775";
         };
       };
-      immich = {
-        "/data/media/immich".z = {
-          user = "immich";
-          group = "immich";
-          mode = "0700";
-        };
-      };
+      immich =
+        lib.genAttrs
+          [
+            "/data/media/immich"
+            "/data/media/immich/thumbs"
+            "/data/media/immich/encoded-video"
+          ]
+          (_: {
+            z = {
+              user = "immich";
+              group = "immich";
+              mode = "0700";
+            };
+          });
       radarr = {
         "/data/torrents/movies".d = {
           user = "radarr";
@@ -367,7 +374,6 @@ in
       [
         "transmission"
         "prowlarr"
-        "immich-server"
         "caddy"
         "samba-smbd"
       ]
@@ -381,6 +387,15 @@ in
       serviceConfig.UMask = lib.mkForce "0002";
     })
     // {
+      immich-server = {
+        after = [ "zfs-mount.service" ];
+        requires = [ "zfs-mount.service" ];
+        unitConfig.RequiresMountsFor = [
+          "/data/media/immich/thumbs"
+          "/data/media/immich/encoded-video"
+        ];
+      };
+
       zfs-mount.restartIfChanged = false;
 
       zfs-load-key-data-media = {
