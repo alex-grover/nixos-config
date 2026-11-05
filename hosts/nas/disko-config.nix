@@ -93,6 +93,29 @@
               "com.sun:auto-snapshot" = "true";
             };
           };
+          # Regenerable Immich data, kept outside data/media so it is excluded
+          # from snapshots, syncoid replication, and offsite backups.
+          immich-cache = {
+            type = "zfs_fs";
+            options = {
+              mountpoint = "none";
+              canmount = "off";
+              "com.sun:auto-snapshot" = "false";
+            };
+          };
+          "immich-cache/thumbs" = {
+            type = "zfs_fs";
+            mountpoint = "/data/media/immich/thumbs";
+            options.canmount = "noauto";
+          };
+          "immich-cache/encoded-video" = {
+            type = "zfs_fs";
+            mountpoint = "/data/media/immich/encoded-video";
+            options = {
+              canmount = "noauto";
+              recordsize = "1M";
+            };
+          };
           torrents = {
             type = "zfs_fs";
             mountpoint = "/data/torrents";
