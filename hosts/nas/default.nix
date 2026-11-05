@@ -18,6 +18,13 @@ let
   vpnGateway = "10.2.0.1";
   vpnTable = "51820";
   photosDomain = "photos.alexgrover.me";
+  backup = {
+    dataset = "data/media";
+    bucket = "media-backups-260677135963-us-west-2-an";
+    region = "us-west-2";
+    prefix = "media";
+    snapshotPrefix = "zfs-auto-snap_monthly-";
+  };
   dashboardServices = [
     {
       name = "Radarr";
@@ -44,6 +51,7 @@ in
     ./hardware-configuration.nix
   ];
 
+  age.secrets.backup.file = ../../secrets/backup.age;
   age.secrets.smtp.file = ../../secrets/smtp.age;
   age.secrets.vercel.file = ../../secrets/vercel.age;
   age.secrets.vpn.file = ../../secrets/vpn.age;
@@ -112,6 +120,11 @@ in
       sendOptions = "-w";
       recvOptions = "-u";
     };
+  };
+
+  systemd.timers.backup.timerConfig = {
+    Persistent = true;
+    RandomizedDelaySec = "1h";
   };
 
   systemd.tmpfiles.settings =
@@ -397,6 +410,86 @@ in
       };
 
       zfs-mount.restartIfChanged = false;
+
+      backup = {
+        description = "Upload raw ZFS send of ${backup.dataset} to S3";
+        after = [
+          "zfs-mount.service"
+          "network-online.target"
+        ];
+        requires = [ "zfs-mount.service" ];
+        wants = [ "network-online.target" ];
+        onSuccess = [ "backup-notify@succeeded.service" ];
+        onFailure = [ "backup-notify@failed.service" ];
+        # zfs-auto-snapshot takes the monthly snapshot at midnight on the 1st.
+        startAt = "*-*-01 03:00:00";
+        environment.AWS_DEFAULT_REGION = backup.region;
+        serviceConfig = {
+          Type = "oneshot";
+          EnvironmentFile = config.age.secrets.backup.path;
+          Nice = 19;
+          IOSchedulingClass = "idle";
+        };
+        path = with pkgs; [
+          zfs
+          awscli2
+          coreutils
+          gnugrep
+        ];
+        script = ''
+          set -euo pipefail
+          dataset=${backup.dataset}
+          latest() {
+            zfs list -H -t "$1" -o name -s creation "$dataset" | grep -F "${backup.snapshotPrefix}" | tail -n 1
+          }
+
+          snap=$(latest snapshot | cut -d@ -f2)
+          # Bookmarks mark completed uploads and are the base for the next incremental.
+          base=$(latest bookmark || true)
+
+          if [ "$base" = "$dataset#$snap" ]; then
+            echo "$dataset@$snap is already uploaded"
+            exit 0
+          fi
+
+          if [ -n "$base" ]; then
+            incremental=(-i "$base")
+            kind="incremental-from-''${base#*#}"
+          else
+            incremental=()
+            kind=full
+          fi
+
+          export DEST="s3://${backup.bucket}/${backup.prefix}/$snap-$kind"
+          echo "Uploading $dataset@$snap to $DEST"
+
+          zfs send -w "''${incremental[@]}" "$dataset@$snap" \
+            | split -b 32G -a 5 -d \
+                --filter 'aws s3 cp --only-show-errors --storage-class DEEP_ARCHIVE - "$DEST/$FILE"' \
+                - part-
+          echo "$dataset@$snap $kind" | aws s3 cp --only-show-errors - "$DEST/COMPLETE"
+
+          zfs bookmark "$dataset@$snap" "$dataset#$snap"
+          echo "Finished $DEST"
+        '';
+      };
+
+      "backup-notify@" = {
+        description = "Email backup result (%i)";
+        serviceConfig.Type = "oneshot";
+        scriptArgs = "%i";
+        path = with pkgs; [
+          msmtp
+          systemd
+        ];
+        script = ''
+          {
+            echo "Subject: [${name}] backup $1"
+            echo
+            journalctl -u backup.service -n 50 --no-pager
+          } | msmtp ${email}
+        '';
+      };
 
       zfs-load-key-data-media = {
         description = "Load ZFS encryption key for data/media";

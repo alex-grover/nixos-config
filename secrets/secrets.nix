@@ -1,6 +1,7 @@
 let
   keys = import ../lib/keys.nix;
   secrets = [
+    "backup.age"
     "rex-netrc.age"
     "smtp.age"
     "vercel.age"
