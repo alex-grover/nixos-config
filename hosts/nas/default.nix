@@ -25,6 +25,40 @@ let
     prefix = "media";
     snapshotPrefix = "zfs-auto-snap_monthly-";
   };
+  # Reproduces the ETag S3 assigns to an object streamed with `aws s3 cp -`,
+  # which uploads in 8 MiB multipart chunks once the stream reaches 8 MiB.
+  backupPartEtag = pkgs.writeScript "backup-part-etag" ''
+    #!${pkgs.python3}/bin/python3
+    import hashlib
+    import sys
+
+    chunk_size = 8 * 1024 * 1024
+    digests = []
+    size = 0
+    while chunk := sys.stdin.buffer.read(chunk_size):
+        size += len(chunk)
+        digests.append(hashlib.md5(chunk).digest())
+
+    if size < chunk_size:
+        print(digests[0].hex() if digests else hashlib.md5(b"").hexdigest())
+    else:
+        combined = hashlib.md5(b"".join(digests)).hexdigest()
+        print(f"{combined}-{len(digests)}")
+  '';
+  # split --filter target: skips parts a previous interrupted run already uploaded.
+  backupUploadPart = pkgs.writeShellScript "backup-upload-part" ''
+    set -euo pipefail
+    key="$KEY_PREFIX/$FILE"
+    if existing=$(aws s3api head-object --bucket "$BUCKET" --key "$key" --query ETag --output text 2>/dev/null); then
+      if [ "$(${backupPartEtag})" = "''${existing//\"/}" ]; then
+        echo "Skipping $FILE, already uploaded"
+        exit 0
+      fi
+      echo "$FILE in S3 doesn't match this send stream. Delete s3://$BUCKET/$KEY_PREFIX/ and rerun." >&2
+      exit 1
+    fi
+    exec aws s3 cp --only-show-errors --storage-class DEEP_ARCHIVE - "s3://$BUCKET/$key"
+  '';
   dashboardServices = [
     {
       name = "Radarr";
@@ -423,7 +457,12 @@ in
         onFailure = [ "backup-notify@failed.service" ];
         # zfs-auto-snapshot takes the monthly snapshot at midnight on the 1st.
         startAt = "*-*-01 03:00:00";
-        environment.AWS_DEFAULT_REGION = backup.region;
+        environment = {
+          AWS_DEFAULT_REGION = backup.region;
+          # Rides out short network drops instead of failing the whole run.
+          AWS_RETRY_MODE = "standard";
+          AWS_MAX_ATTEMPTS = "10";
+        };
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = config.age.secrets.backup.path;
@@ -460,14 +499,15 @@ in
             kind=full
           fi
 
-          export DEST="s3://${backup.bucket}/${backup.prefix}/$snap-$kind"
-          echo "Uploading $dataset@$snap to $DEST"
+          export BUCKET=${backup.bucket}
+          export KEY_PREFIX="${backup.prefix}/$snap-$kind"
+          dest="s3://$BUCKET/$KEY_PREFIX"
+          echo "Uploading $dataset@$snap to $dest"
 
+          # Each run regenerates the same stream, so parts from an interrupted run are skipped.
           zfs send -w "''${incremental[@]}" "$dataset@$snap" \
-            | split -b 32G -a 5 -d \
-                --filter 'aws s3 cp --only-show-errors --storage-class DEEP_ARCHIVE - "$DEST/$FILE"' \
-                - part-
-          echo "$dataset@$snap $kind" | aws s3 cp --only-show-errors - "$DEST/COMPLETE"
+            | split -b 32G -a 5 -d --filter ${backupUploadPart} - part-
+          echo "$dataset@$snap $kind" | aws s3 cp --only-show-errors - "$dest/COMPLETE"
 
           zfs bookmark "$dataset@$snap" "$dataset#$snap"
           echo "Finished $DEST"
