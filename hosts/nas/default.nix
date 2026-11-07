@@ -49,15 +49,18 @@ let
   backupUploadPart = pkgs.writeShellScript "backup-upload-part" ''
     set -euo pipefail
     key="$KEY_PREFIX/$FILE"
-    if existing=$(aws s3api head-object --bucket "$BUCKET" --key "$key" --query ETag --output text 2>/dev/null); then
+    if existing=$(aws s3api head-object --bucket "$BUCKET" --key "$key" --query ETag --output text 2>&1); then
       if [ "$(${backupPartEtag})" = "''${existing//\"/}" ]; then
         echo "Skipping $FILE, already uploaded"
         exit 0
       fi
       echo "$FILE in S3 doesn't match this send stream. Delete s3://$BUCKET/$KEY_PREFIX/ and rerun." >&2
       exit 1
+    elif [[ $existing == *"(404)"* ]]; then
+      exec aws s3 cp --only-show-errors --storage-class DEEP_ARCHIVE - "s3://$BUCKET/$key"
     fi
-    exec aws s3 cp --only-show-errors --storage-class DEEP_ARCHIVE - "s3://$BUCKET/$key"
+    echo "Couldn't check whether $FILE is already uploaded: $existing" >&2
+    exit 1
   '';
   dashboardServices = [
     {
@@ -510,7 +513,7 @@ in
           echo "$dataset@$snap $kind" | aws s3 cp --only-show-errors - "$dest/COMPLETE"
 
           zfs bookmark "$dataset@$snap" "$dataset#$snap"
-          echo "Finished $DEST"
+          echo "Finished $dest"
         '';
       };
 
