@@ -344,7 +344,7 @@ in
           redir /adguard /adguard/
 
           handle_path /adguard/* {
-            reverse_proxy 127.0.0.1:${toString config.services.adguardhome.port} {
+            reverse_proxy 127.0.0.1:3000 {
               header_down Location "^/(.*)$" "/adguard/$1"
               header_down Set-Cookie "(?i)Path=/" "Path=/adguard/"
             }
