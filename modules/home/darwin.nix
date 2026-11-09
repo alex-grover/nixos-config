@@ -4,8 +4,8 @@
 }:
 {
   home.packages = [
+    pkgs.raycast
     pkgs.spotify
-    pkgs.tinycast
   ];
 
   programs.pi-coding-agent = {
