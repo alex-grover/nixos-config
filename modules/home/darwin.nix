@@ -14,7 +14,7 @@
     extraPackages = [ pkgs.nodejs ];
     settings = {
       defaultProvider = "vercel-ai-gateway";
-      defaultModel = "openai/gpt-6.1-sol";
+      defaultModel = "anthropic/claude-opus-5.5";
       defaultThinkingLevel = "high";
       packages = [
         "npm:pi-web-access@0.33.0"
