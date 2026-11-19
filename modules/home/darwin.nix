@@ -4,7 +4,6 @@
 }:
 {
   home.packages = [
-    pkgs.raycast
     pkgs.spotify
   ];
 

@@ -44,6 +44,7 @@
     casks = [
       "alcove"
       "logi-options+"
+      "raycast"
       "tailscale-app"
     ];
 
