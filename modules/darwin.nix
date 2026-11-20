@@ -28,6 +28,42 @@
     extraEnv.HOMEBREW_ORIGINAL_BREW_FILE = "${config.nix-homebrew.defaultArm64Prefix}/bin/brew";
   };
 
+  # Rex isn't packaged for macOS, so install it from its Sparkle appcast if it's
+  # missing; the app keeps itself up to date after that. Runs before the dock is
+  # configured so its tile resolves on first activation.
+  #
+  # NOT REPRODUCIBLE: this always installs whatever build is newest in the
+  # snapshot appcast at activation time. The version isn't pinned by
+  # flake.lock, and rolling back this config doesn't change the installed app.
+  system.activationScripts.extraActivation.text =
+    let
+      installRex = pkgs.writeShellScript "install-rex" ''
+        set -euo pipefail
+        app=/Applications/Rex.app
+        [ -e "$app" ] && exit 0
+
+        echo "installing Rex..." >&2
+        tmp=$(mktemp -d)
+        trap '/usr/bin/hdiutil detach -quiet "$tmp/mnt" 2>/dev/null || true; rm -rf "$tmp"' EXIT
+        url=$(/usr/bin/curl -fsSL https://blob.superlogical.com/public/rex-app/snapshot/appcast.xml \
+          | grep -o 'enclosure url="[^"]*"' | head -1 | cut -d'"' -f2)
+        /usr/bin/curl -fsSL -o "$tmp/rex.dmg" "$url"
+        mkdir "$tmp/mnt"
+        /usr/bin/hdiutil attach -quiet -nobrowse -readonly -noautoopen -mountpoint "$tmp/mnt" "$tmp/rex.dmg"
+        /usr/bin/codesign --verify --deep --strict \
+          -R='anchor apple generic and certificate leaf[subject.OU] = "AG92C3PT77"' "$tmp/mnt/Rex.app"
+        # curl doesn't quarantine the download, so Gatekeeper won't check it on
+        # first launch; run its notarization check here instead.
+        /usr/sbin/spctl --assess --type execute "$tmp/mnt/Rex.app"
+        /usr/bin/ditto "$tmp/mnt/Rex.app" "$app"
+        # Owned by the user so Sparkle can update it without a password prompt.
+        chown -R ${user}:staff "$app"
+      '';
+    in
+    ''
+      ${installRex} || echo "warning: failed to install Rex" >&2
+    '';
+
   system.stateVersion = 6;
   system.primaryUser = user;
   users.knownUsers = [ user ];
@@ -97,6 +133,7 @@
           "/System/Cryptexes/App/System/Applications/Safari.app"
           "/System/Applications/Reminders.app"
           "/System/Applications/Messages.app"
+          "/Applications/Rex.app"
         ]
         (lib.mkAfter [
           "/Users/${user}/Applications/Home Manager Apps/Spotify.app"
